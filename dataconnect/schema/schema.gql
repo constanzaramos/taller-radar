@@ -1,0 +1,49 @@
+type User @table {
+  displayName: String!
+  createdAt: Timestamp!
+  email: String
+  photoUrl: String
+  bio: String
+}
+
+type Organizer @table {
+  name: String!
+  contactEmail: String!
+  user: User
+  website: String
+  bio: String
+  phoneNumber: String
+}
+
+type Workshop @table {
+  title: String!
+  description: String!
+  startDate: Timestamp!
+  endDate: Timestamp!
+  location: String!
+  price: Float!
+  capacity: Int!
+  createdAt: Timestamp!
+  organizer: Organizer
+  category: Category
+  prerequisites: String
+  imageUrl: String
+  externalRegistrationLink: String
+}
+
+type Instructor @table {
+  name: String!
+  bio: String
+  profileImageUrl: String
+  contactEmail: String
+}
+
+type WorkshopInstructor @table(key: ["workshop", "instructor"]) {
+  workshop: Workshop!
+  instructor: Instructor!
+}
+
+type Category @table {
+  name: String!
+  description: String
+}

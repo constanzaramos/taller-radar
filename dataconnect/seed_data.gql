@@ -1,0 +1,78 @@
+mutation CreateSeedData @transaction @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      displayName: "demouser1",
+      email: "demo1@example.com",
+      createdAt: "2024-04-26T12:00:00Z"
+    },
+    {
+      id: "661f9511-f3ac-52e5-b827-557766881111",
+      displayName: "demouser2",
+      email: "demo2@example.com",
+      createdAt: "2024-04-26T13:00:00Z"
+    }
+  ])
+  organizer_insertMany(data: [
+    {
+      id: "772a0622-04bb-63f6-c938-668877992222",
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      name: "Demo Organizer 1",
+      contactEmail: "organizer1@example.com"
+    },
+    {
+      id: "883b1733-15cc-7407-da49-779988003333",
+      userId: "661f9511-f3ac-52e5-b827-557766881111",
+      name: "Demo Organizer 2",
+      contactEmail: "organizer2@example.com"
+    }
+  ])
+  category_insertMany(data: [
+    {
+      id: "994c2844-26dd-8518-eb5a-880099114444",
+      name: "Demo Category 1"
+    },
+    {
+      id: "aa5d3955-37ee-9629-fc6b-991100225555",
+      name: "Demo Category 2"
+    }
+  ])
+  workshop_insertMany(data: [
+    {
+      id: "bb6e4a66-48ff-a73a-0d7c-002211336666",
+      organizerId: "772a0622-04bb-63f6-c938-668877992222",
+      categoryId: "994c2844-26dd-8518-eb5a-880099114444",
+      title: "Demo Workshop 1",
+      description: "This is a demo workshop.",
+      location: "Online",
+      capacity: 20,
+      price: 29.99,
+      startDate: "2024-05-01T10:00:00Z",
+      endDate: "2024-05-01T12:00:00Z",
+      createdAt: "2024-04-27T08:00:00Z"
+    },
+    {
+      id: "cc7f5b77-59aa-b84b-1e8d-113322447777",
+      organizerId: "883b1733-15cc-7407-da49-779988003333",
+      categoryId: "aa5d3955-37ee-9629-fc6b-991100225555",
+      title: "Demo Workshop 2",
+      description: "This is another demo workshop.",
+      location: "In-Person",
+      capacity: 15,
+      price: 49.99,
+      startDate: "2024-05-08T14:00:00Z",
+      endDate: "2024-05-08T16:00:00Z",
+      createdAt: "2024-04-27T09:00:00Z"
+    }
+  ])
+  workshopInstructor_insertMany(data: [
+    {
+      workshopId: "bb6e4a66-48ff-a73a-0d7c-002211336666",
+      instructorId: "550e8400-e29b-41d4-a716-446655440000"
+    },
+    {
+      workshopId: "cc7f5b77-59aa-b84b-1e8d-113322447777",
+      instructorId: "661f9511-f3ac-52e5-b827-557766881111"
+    }
+  ])
+}

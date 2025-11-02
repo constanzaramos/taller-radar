@@ -1,0 +1,71 @@
+mutation CreateDemoUser @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  user_insert(data: {id: "550e8400-e29b-41d4-a716-446655440000", displayName: "demouser"})
+}
+
+query ListWorkshops @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  workshops {
+    id
+    title
+    description
+    startDate
+    endDate
+    location
+    price
+    capacity
+    imageUrl
+    externalRegistrationLink
+    prerequisites
+    category {
+      id
+      name
+      description
+    }
+    organizer {
+      id
+      name
+      bio
+      contactEmail
+      phoneNumber
+      website
+    }
+  }
+}
+
+mutation UpdateWorkshop($id: UUID!, $title: String, $description: String, $startDate: Timestamp, $endDate: Timestamp, $location: String, $price: Float, $capacity: Int, $imageUrl: String, $externalRegistrationLink: String, $prerequisites: String, $categoryId: UUID, $organizerId: UUID) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users.") {
+  workshop_update(
+    id: $id,
+    data: {
+      title: $title,
+      description: $description,
+      startDate: $startDate,
+      endDate: $endDate,
+      location: $location,
+      price: $price,
+      capacity: $capacity,
+      imageUrl: $imageUrl,
+      externalRegistrationLink: $externalRegistrationLink,
+      prerequisites: $prerequisites,
+      categoryId: $categoryId,
+      organizerId: $organizerId
+    }
+  )
+}
+
+query GetMyOrganizer @auth(level: USER) {
+  organizers(where: {userId: {eq_expr: "auth.uid"}}) {
+    id
+    name
+    bio
+    contactEmail
+    phoneNumber
+    website
+    user {
+      id
+      displayName
+      email
+      photoUrl
+      bio
+      createdAt
+    }
+  }
+}
