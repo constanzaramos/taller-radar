@@ -40,9 +40,19 @@ npm run build
 
 ## 🔧 Configuración
 
-1. Configura tu proyecto de Firebase en `src/firebase/config.js`
-2. Asegúrate de tener las reglas de seguridad de Firestore configuradas
-3. Configura la autenticación en Firebase Console
+1. **Configuración de Firebase**:
+   - Copia el archivo `.env.example` a `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+   - Obtén tus credenciales de Firebase desde [Firebase Console](https://console.firebase.google.com/) > Project Settings > General > Your apps
+   - Completa las variables de entorno en el archivo `.env` con tus credenciales
+
+2. **Configuración de Firestore**:
+   - Asegúrate de tener las reglas de seguridad de Firestore configuradas
+   - Configura la autenticación en Firebase Console
+
+**Nota**: El archivo `.env` está en `.gitignore` y no se subirá al repositorio por seguridad.
 
 ## 📝 Estructura del proyecto
 
