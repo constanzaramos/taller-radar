@@ -5,28 +5,28 @@ export default function Calendar() {
   const { selectedDate, setSelectedDate } = useDate();
   const tz = "America/Santiago";
 
-  // Estado local del mes y año
+  // 🔹 Obtener fecha actual en zona horaria Chile
   const now = new Date();
   const today = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+
+  // Estado del mes/año visibles en el calendario
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  // Obtener el primer día del mes actual
+  // Calcular primeros y últimos días del mes
   const firstDay = new Date(currentYear, currentMonth, 1);
   const lastDay = new Date(currentYear, currentMonth + 1, 0);
-  const startDay = firstDay.getDay(); // domingo=0, lunes=1, etc.
+  const startDay = (firstDay.getDay() + 6) % 7; // lunes=0
   const daysInMonth = lastDay.getDate();
 
-  // Días del calendario (llenamos espacios vacíos previos)
+  // Generar array de días del mes (con huecos iniciales)
   const days = [];
-  for (let i = 0; i < startDay; i++) {
-    days.push(null);
-  }
+  for (let i = 0; i < startDay; i++) days.push(null);
   for (let d = 1; d <= daysInMonth; d++) {
     days.push(new Date(currentYear, currentMonth, d));
   }
 
-  // Navegar meses
+  // 🔄 Navegar meses
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11);
@@ -45,23 +45,24 @@ export default function Calendar() {
     }
   };
 
-  // Seleccionar día
+  // 📅 Seleccionar día
   const handleSelectDay = (day) => {
     if (!day) return;
-    const localDay = new Date(
-      day.toLocaleString("en-US", { timeZone: tz })
-    );
-    if (localDay < today.setHours(0, 0, 0, 0)) return; // no permitir días pasados
+    const localDay = new Date(day.toLocaleString("en-US", { timeZone: tz }));
+    const startOfToday = new Date(today);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    if (localDay < startOfToday) return; // ❌ no permitir días pasados
     setSelectedDate(localDay.toISOString().split("T")[0]);
   };
 
-  // Mostrar mes actual
-  const monthName = new Date(currentYear, currentMonth).toLocaleString(
-    "es-CL",
-    { month: "long", year: "numeric" }
-  );
+  // 🗓 Nombre del mes
+  const monthName = new Date(currentYear, currentMonth).toLocaleString("es-CL", {
+    month: "long",
+    year: "numeric",
+  });
 
-  // Función para saber si una fecha es hoy
+  // ✅ Comprobaciones de fecha
   const isToday = (date) => {
     if (!date) return false;
     const d = new Date(date.toLocaleString("en-US", { timeZone: tz }));
@@ -72,15 +73,17 @@ export default function Calendar() {
     );
   };
 
-  // Función para saber si es pasada
   const isPast = (date) => {
     if (!date) return false;
     const d = new Date(date.toLocaleString("en-US", { timeZone: tz }));
-    return d < today.setHours(0, 0, 0, 0);
+    const startOfToday = new Date(today);
+    startOfToday.setHours(0, 0, 0, 0);
+    return d < startOfToday;
   };
 
   return (
     <div className="bg-white border rounded-xl p-4 shadow-sm text-sm">
+      {/* Header de navegación */}
       <div className="flex justify-between items-center mb-3">
         <button
           onClick={handlePrevMonth}
@@ -97,6 +100,7 @@ export default function Calendar() {
         </button>
       </div>
 
+      {/* Días de la semana */}
       <div className="grid grid-cols-7 text-center font-medium text-neutral-700">
         <div>L</div>
         <div>M</div>
@@ -107,12 +111,12 @@ export default function Calendar() {
         <div>D</div>
       </div>
 
+      {/* Días del mes */}
       <div className="grid grid-cols-7 text-center mt-2">
         {days.map((day, i) => {
           if (!day) return <div key={i}></div>;
 
-          const isSelected =
-            selectedDate === day.toISOString().split("T")[0];
+          const isSelected = selectedDate === day.toISOString().split("T")[0];
           const past = isPast(day);
           const todayCheck = isToday(day);
 

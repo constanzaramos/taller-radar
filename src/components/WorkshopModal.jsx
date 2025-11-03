@@ -87,7 +87,8 @@ export default function WorkshopModal({
         {/* Contacto */}
         {workshop.contact && (
           <p className="text-sm mb-2">
-            <span className="font-semibold">📞 Contacto:</span> {workshop.contact}
+            <span className="font-semibold">📞 Contacto:</span>{" "}
+            {workshop.contact}
           </p>
         )}
 
@@ -103,6 +104,13 @@ export default function WorkshopModal({
             >
               Ver perfil
             </a>
+          </p>
+        )}
+        {workshop.fullAddress && (
+          <p className="text-sm mb-2">
+            <span>📍</span>
+            <span className="font-semibold">Dirección:</span>
+            {workshop.fullAddress}
           </p>
         )}
 

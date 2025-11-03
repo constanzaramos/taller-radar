@@ -3,27 +3,55 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useDate } from "../context/DateContext";
 import WorkshopModal from "./WorkshopModal";
-import { getLocalDateString, formatDateForDisplay } from "../utils/formatDateLocal";
+
+// 🕓 Corrige la interpretación local del string de fecha ("YYYY-MM-DD")
+const parseLocalDate = (dateString) => {
+  if (!dateString) return null;
+  const [year, month, day] = dateString.split("-").map(Number);
+  // No genera offset UTC → fecha local pura
+  return new Date(year, month - 1, day);
+};
+
+// 🎯 Formato para mostrar la fecha correctamente (Chile)
+const formatDateForDisplay = (dateString) => {
+  const localDate = parseLocalDate(dateString);
+  if (!localDate) return "";
+  return localDate.toLocaleDateString("es-CL", {
+    timeZone: "America/Santiago",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// 🔹 Devuelve string en formato YYYY-MM-DD (para comparación con el calendario)
+const getLocalDateString = (dateString) => {
+  const localDate = parseLocalDate(dateString);
+  if (!localDate) return "";
+  return localDate.toLocaleDateString("en-CA", { timeZone: "America/Santiago" });
+};
 
 export default function WorkshopGrid() {
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const { selectedDate, setSelectedDate } = useDate();
 
-  // 🔥 Obtener talleres en tiempo real desde Firestore
+  // 🔥 Obtener talleres aprobados en tiempo real desde Firestore
   useEffect(() => {
     const q = collection(db, "workshops");
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const data = snapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .filter((w) => w.approved === true);
       setWorkshops(data);
     });
     return () => unsubscribe();
   }, []);
 
-  // 🎯 Filtrar por fecha seleccionada
+  // 🎯 Filtrar talleres por fecha seleccionada
   const filteredWorkshops = selectedDate
     ? workshops.filter((w) => {
         const workshopDate = getLocalDateString(w.date);
