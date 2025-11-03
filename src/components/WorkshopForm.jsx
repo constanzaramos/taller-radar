@@ -1,7 +1,8 @@
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { db } from "../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
+import { uploadToCloudinary } from "../utils/uploadToCloudinary";
 
 export default function WorkshopForm() {
   const {
@@ -9,11 +10,20 @@ export default function WorkshopForm() {
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: { social: [{ handle: "" }] },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "social",
+  });
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [preview, setPreview] = useState("");
   const modality = watch("modality");
 
   const categories = [
@@ -26,7 +36,6 @@ export default function WorkshopForm() {
     "Tecnología y diseño",
   ];
 
-  // Horarios cada 30 min desde 5:00 a 23:30
   const times = [];
   for (let h = 5; h <= 23; h++) {
     times.push(`${String(h).padStart(2, "0")}:00`);
@@ -37,59 +46,59 @@ export default function WorkshopForm() {
     try {
       setLoading(true);
 
-      // Validar y formatear red social
-      let socialUrl = "";
-      if (data.social) {
-        if (data.social.startsWith("@")) {
-          const user = data.social.replace("@", "");
-          socialUrl = `https://instagram.com/${user}`;
-        } else if (data.social.startsWith("https://")) {
-          socialUrl = data.social;
-        } else {
-          socialUrl = `https://${data.social}`;
-        }
+      // 🖼️ Subir imagen a Cloudinary
+      let imageUrl = "";
+      if (data.imageFile && data.imageFile[0]) {
+        imageUrl = await uploadToCloudinary(data.imageFile[0]);
       }
 
-      // Crear enlace automático a Google Maps (solo si es presencial)
+      // 🔗 Procesar redes sociales (solo arrobas)
+      const socials = data.social
+        .map((s) => s.handle.trim())
+        .filter(Boolean)
+        .map((s) => {
+          const username = s.startsWith("@") ? s.slice(1) : s;
+          return `https://instagram.com/${username}`;
+        });
+
+      // 🗺 Crear URL de mapa
       let mapUrl = "";
       if (data.modality === "presencial" && data.address) {
         const fullAddress = `${data.address}, ${data.commune || ""}, ${
           data.city || ""
         }`;
-        mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(
           fullAddress
-        )}`;
-      }
-
-      // Validar rango de edad
-      const minAge = data.ageMin ? Number(data.ageMin) : null;
-      const maxAge = data.ageMax ? Number(data.ageMax) : null;
-
-      if (minAge && maxAge && maxAge < minAge) {
-        alert("❌ La edad máxima no puede ser menor que la mínima");
-        setLoading(false);
-        return;
+        )}&output=embed`;
       }
 
       const formattedData = {
-        ...data,
         name: data.name.trim(),
-        price: Number(data.price),
-        ageMin: minAge,
-        ageMax: maxAge,
         category: [data.category],
-        createdAt: serverTimestamp(),
+        modality: data.modality,
+        address: data.address || "",
+        commune: data.commune || "",
+        city: data.city || "",
+        date: data.date,
+        time: data.time,
+        price: data.isFree ? 0 : Number(data.price || 0),
+        contact: data.contact || "",
+        social: socials,
+        image: imageUrl,
+        description: data.description,
         status: "pending",
         mapUrl,
-        social: socialUrl,
+        createdAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "workshops"), formattedData);
+
       setSuccess(true);
       reset();
+      setPreview("");
     } catch (err) {
-      console.error("Error al guardar:", err);
-      alert("❌ Hubo un error al guardar el taller");
+      console.error("Error al guardar taller:", err);
+      alert("❌ Error al guardar el taller.");
     } finally {
       setLoading(false);
       setTimeout(() => setSuccess(false), 3000);
@@ -109,16 +118,13 @@ export default function WorkshopForm() {
           <input
             {...register("name", {
               required: "El nombre es obligatorio",
-              minLength: {
-                value: 2,
-                message: "Debe tener al menos 2 caracteres",
-              },
+              minLength: { value: 2, message: "Debe tener al menos 2 caracteres" },
             })}
             className="border rounded-lg p-2 w-full"
             placeholder="Nombre del taller *"
           />
           {errors.name && (
-            <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>
+            <p className="text-red-600 text-xs">{errors.name.message}</p>
           )}
         </div>
 
@@ -130,15 +136,11 @@ export default function WorkshopForm() {
           >
             <option value="">Seleccionar categoría *</option>
             {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+              <option key={c}>{c}</option>
             ))}
           </select>
           {errors.category && (
-            <p className="text-red-600 text-xs mt-1">
-              {errors.category.message}
-            </p>
+            <p className="text-red-600 text-xs">{errors.category.message}</p>
           )}
         </div>
 
@@ -148,9 +150,7 @@ export default function WorkshopForm() {
             <input
               type="radio"
               value="presencial"
-              {...register("modality", {
-                required: "Selecciona una modalidad",
-              })}
+              {...register("modality", { required: "Selecciona una modalidad" })}
             />
             <span>Presencial</span>
           </label>
@@ -158,9 +158,7 @@ export default function WorkshopForm() {
             <input
               type="radio"
               value="online"
-              {...register("modality", {
-                required: "Selecciona una modalidad",
-              })}
+              {...register("modality", { required: "Selecciona una modalidad" })}
             />
             <span>Online</span>
           </label>
@@ -171,7 +169,7 @@ export default function WorkshopForm() {
           </p>
         )}
 
-        {/* Campos de ubicación solo si es presencial */}
+        {/* Dirección visible */}
         {modality === "presencial" && (
           <>
             <input
@@ -200,7 +198,7 @@ export default function WorkshopForm() {
             className="border rounded-lg p-2 w-full"
           />
           {errors.date && (
-            <p className="text-red-600 text-xs mt-1">{errors.date.message}</p>
+            <p className="text-red-600 text-xs">{errors.date.message}</p>
           )}
         </div>
 
@@ -212,113 +210,147 @@ export default function WorkshopForm() {
           >
             <option value="">Seleccionar hora *</option>
             {times.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
+              <option key={t}>{t}</option>
             ))}
           </select>
           {errors.time && (
-            <p className="text-red-600 text-xs mt-1">{errors.time.message}</p>
+            <p className="text-red-600 text-xs">{errors.time.message}</p>
           )}
         </div>
 
-        {/* Precio */}
-        <div>
+        {/* Precio + Gratis */}
+        <div className="col-span-2 flex items-center gap-4">
           <input
             type="number"
             {...register("price", {
-              required: "Ingresa el precio",
-              min: { value: 1, message: "Debe ser mayor a 0" },
+              required: false,
+              min: { value: 0, message: "Debe ser mayor o igual a 0" },
             })}
             className="border rounded-lg p-2 w-full"
-            placeholder="Precio (CLP) *"
+            placeholder="Precio (CLP)"
           />
-          {errors.price && (
-            <p className="text-red-600 text-xs mt-1">{errors.price.message}</p>
-          )}
+          <label className="flex items-center gap-2">
+            <input type="checkbox" {...register("isFree")} />
+            <span>Gratis</span>
+          </label>
         </div>
 
-        {/* Edad mínima */}
-        <div>
+        {/* 🧾 Sección Inscripciones */}
+        <div className="col-span-2 border-t pt-4">
+          <h4 className="font-semibold mb-2">📋 Inscripciones</h4>
+
+          {/* Contacto (opcional) */}
           <input
-            type="number"
-            {...register("ageMin", {
-              min: {
-                value: 1,
-                message: "La edad mínima debe ser mayor o igual a 1 año",
-              },
-              max: {
-                value: 99,
-                message: "La edad mínima no puede superar los 99 años",
-              },
-              validate: (value) =>
-                value === "" ||
-                (!isNaN(value) && value >= 1 && value <= 99) ||
-                "Ingresa una edad válida entre 1 y 99",
-            })}
-            className="border rounded-lg p-2 w-full"
-            placeholder="Edad mínima (opcional)"
+            {...register("contact")}
+            className="border rounded-lg p-2 w-full mb-3"
+            placeholder="Correo o teléfono (opcional)"
           />
-          {errors.ageMin && (
-            <p className="text-red-600 text-xs mt-1">{errors.ageMin.message}</p>
-          )}
+
+          {/* Redes sociales */}
+          {fields.map((item, index) => (
+            <div key={item.id} className="flex items-center gap-2 mb-2">
+              <input
+                {...register(`social.${index}.handle`, {
+                  pattern: {
+                    value: /^@[\w.]+$/,
+                    message: "Debe comenzar con @ y solo letras/números",
+                  },
+                })}
+                className="border rounded-lg p-2 flex-1"
+                placeholder="@usuario"
+              />
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className="text-red-500 text-sm"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => append({ handle: "" })}
+            className="text-sky-700 text-sm hover:underline"
+          >
+            + Agregar otra red
+          </button>
         </div>
 
-        {/* Edad máxima */}
-        <div>
-          <input
-            type="number"
-            {...register("ageMax", {
-              min: {
-                value: 1,
-                message: "La edad máxima debe ser mayor o igual a 1 año",
-              },
-              max: {
-                value: 99,
-                message: "La edad máxima no puede superar los 99 años",
-              },
-            })}
-            className="border rounded-lg p-2 w-full"
-            placeholder="Edad máxima (opcional)"
-          />
-          {errors.ageMax && (
-            <p className="text-red-600 text-xs mt-1">{errors.ageMax.message}</p>
-          )}
-        </div>
+        {/* Imagen con botón bonito */}
+        <div className="col-span-2 border-t pt-4">
+          <h4 className="font-semibold mb-2">🖼️ Imagen del taller</h4>
 
-        {/* Contacto */}
-        <div>
-          <input
-            {...register("contact", { required: "Ingresa un contacto" })}
-            className="border rounded-lg p-2 w-full"
-            placeholder="Correo o teléfono *"
-          />
-          {errors.contact && (
-            <p className="text-red-600 text-xs mt-1">
-              {errors.contact.message}
-            </p>
-          )}
-        </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <button
+              type="button"
+              onClick={() => document.getElementById("imageInput").click()}
+              className={`flex items-center gap-2 ${
+                preview
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-sky-700 hover:bg-sky-800"
+              } text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-all duration-150`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 7.5 7.5 12m4.5-9v12"
+                />
+              </svg>
+              {preview ? "Cambiar imagen" : "Subir imagen"}
+            </button>
 
-        {/* Red social */}
-        <div>
-          <input
-            {...register("social")}
-            className="border rounded-lg p-2 w-full"
-            placeholder="Instagram o sitio web (ej: @usuario)"
-          />
-        </div>
+            {preview && (
+              <span className="text-sm text-neutral-600">
+                Imagen seleccionada ✓
+              </span>
+            )}
+          </div>
 
-        {/* Imagen */}
-        <div className="col-span-2">
           <input
-            {...register("image", { required: "Ingresa una URL de imagen" })}
-            className="border rounded-lg p-2 w-full"
-            placeholder="URL de imagen (https://...) *"
+            type="file"
+            accept="image/*"
+            id="imageInput"
+            {...register("imageFile")}
+            onChange={(e) => {
+              if (e.target.files[0]) {
+                setPreview(URL.createObjectURL(e.target.files[0]));
+              }
+            }}
+            className="hidden"
           />
-          {errors.image && (
-            <p className="text-red-600 text-xs mt-1">{errors.image.message}</p>
+
+          {preview && (
+            <div className="mt-3">
+              <img
+                src={preview}
+                alt="Vista previa"
+                className="w-full h-48 object-cover rounded-xl border shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  setPreview("");
+                  document.getElementById("imageInput").value = "";
+                }}
+                className="mt-2 text-sm text-red-500 hover:underline"
+              >
+                Quitar imagen
+              </button>
+            </div>
           )}
+
+          <p className="text-xs text-neutral-500 mt-2">
+            Formatos admitidos: JPG, PNG, WEBP. Tamaño máximo: 5 MB.
+          </p>
         </div>
 
         {/* Descripción */}
@@ -336,18 +368,18 @@ export default function WorkshopForm() {
             placeholder="Descripción del taller *"
           />
           {errors.description && (
-            <p className="text-red-600 text-xs mt-1">
+            <p className="text-red-600 text-xs">
               {errors.description.message}
             </p>
           )}
         </div>
 
-        {/* Botón */}
+        {/* Botón enviar */}
         <button
           disabled={loading}
-          className={`${
-            loading ? "bg-neutral-400" : "bg-sky-700 hover:bg-sky-800"
-          } text-white rounded-lg px-4 py-2 col-span-2 mt-2`}
+          className={`col-span-2 rounded-lg px-4 py-2 text-white ${
+            loading ? "bg-gray-400" : "bg-sky-700 hover:bg-sky-800"
+          }`}
         >
           {loading ? "Guardando..." : "Enviar taller"}
         </button>

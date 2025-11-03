@@ -1,60 +1,96 @@
 import { useEffect, useState } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
-import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
-import WorkshopCard from "./WorkshopCard";
+import { useDate } from "../context/DateContext";
+import WorkshopModal from "./WorkshopModal";
+import { getLocalDateString, formatDateForDisplay } from "../utils/formatDateLocal";
 
 export default function WorkshopGrid() {
   const [workshops, setWorkshops] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedWorkshop, setSelectedWorkshop] = useState(null);
+  const { selectedDate, setSelectedDate } = useDate();
 
-  // Leer los talleres desde Firestore al cargar el componente
+  // 🔥 Obtener talleres en tiempo real desde Firestore
   useEffect(() => {
-    const fetchWorkshops = async () => {
-      try {
-        const q = query(
-            collection(db, "workshops"),
-            where("status", "==", "approved"),
-            orderBy("createdAt", "desc")
-          );
-          
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        console.log("Workshops desde Firestore:", data);
-
-        setWorkshops(data);
-      } catch (error) {
-        console.error("Error al cargar talleres:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWorkshops();
+    const q = collection(db, "workshops");
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setWorkshops(data);
+    });
+    return () => unsubscribe();
   }, []);
 
-  if (loading) {
-    return <p className="text-center text-neutral-600 mt-6">Cargando talleres...</p>;
-  }
-
-  if (workshops.length === 0) {
-    return <p className="text-center text-neutral-600 mt-6">No hay talleres publicados aún.</p>;
-  }
+  // 🎯 Filtrar por fecha seleccionada
+  const filteredWorkshops = selectedDate
+    ? workshops.filter((w) => {
+        const workshopDate = getLocalDateString(w.date);
+        return workshopDate === selectedDate;
+      })
+    : workshops;
 
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      {workshops.map((w) => (
-        <WorkshopCard
-          key={w.id}
-          title={w.title}
-          date={w.date}
-          city={w.city}
-          price={w.price}
-          image={w.image || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=60"} // imagen genérica si no hay
-        />
-      ))}
+    <div>
+      {/* Botón para volver a ver todos */}
+      {selectedDate && (
+        <div className="mb-4">
+          <button
+            onClick={() => setSelectedDate(null)}
+            className="text-sky-700 text-sm font-medium hover:underline"
+          >
+            🔁 Ver todos los talleres
+          </button>
+        </div>
+      )}
+
+      {/* Grid de talleres */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 relative">
+        {filteredWorkshops.length > 0 ? (
+          filteredWorkshops.map((w) => (
+            <div
+              key={w.id}
+              className="border rounded-xl p-3 bg-white hover:shadow-lg cursor-pointer transition duration-200"
+              onClick={() => setSelectedWorkshop(w)}
+            >
+              {/* Imagen */}
+              {w.image ? (
+                <img
+                  src={w.image}
+                  alt={w.name}
+                  className="w-full h-40 object-cover rounded-md"
+                />
+              ) : (
+                <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                  Sin imagen
+                </div>
+              )}
+
+              {/* Información principal */}
+              <h3 className="font-semibold mt-2">{w.name}</h3>
+              <p className="text-sm text-neutral-600">
+                {Array.isArray(w.category) ? w.category.join(", ") : w.category}
+              </p>
+              <p className="text-sm text-neutral-500">
+                {formatDateForDisplay(w.date)}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className="col-span-full text-center text-neutral-500 italic py-10">
+            🗓️ No hay talleres para este día
+          </p>
+        )}
+
+        {/* Modal de detalle */}
+        {selectedWorkshop && (
+          <WorkshopModal
+            workshop={selectedWorkshop}
+            onClose={() => setSelectedWorkshop(null)}
+          />
+        )}
+      </div>
     </div>
   );
 }
