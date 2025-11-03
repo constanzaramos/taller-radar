@@ -2,7 +2,8 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { db } from "../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
-import { uploadToCloudinary } from "../utils/uploadToCloudinary";
+import { uploadToImgBB } from "../utils/uploadToImgBB";
+
 
 export default function WorkshopForm() {
   const {
@@ -46,10 +47,13 @@ export default function WorkshopForm() {
     try {
       setLoading(true);
 
-      // 🖼️ Subir imagen a Cloudinary
+      // 🖼️ Subir imagen (ImgBB)
       let imageUrl = "";
-      if (data.imageFile && data.imageFile[0]) {
-        imageUrl = await uploadToCloudinary(data.imageFile[0]);
+      const fileFromForm = data.imageFile && data.imageFile[0];
+      const fileFromDom = document.getElementById("imageInput")?.files?.[0];
+      const file = fileFromForm || fileFromDom;
+      if (file) {
+        imageUrl = await uploadToImgBB(file);
       }
 
       // 🔗 Redes sociales (solo arrobas)
@@ -69,9 +73,7 @@ export default function WorkshopForm() {
         mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`;
       }
 
-      // 🕓 Corregir desfase de fecha al guardar (zona horaria Chile)
-      const localDate = new Date(data.date);
-      localDate.setMinutes(localDate.getMinutes() + localDate.getTimezoneOffset() - 180);
+      // 🗓 Guardar la fecha tal como viene del input (YYYY-MM-DD) para evitar desfases
 
       // 📦 Datos a guardar
       const formattedData = {
@@ -82,7 +84,7 @@ export default function WorkshopForm() {
         commune: data.commune || "",
         city: data.city || "",
         fullAddress,
-        date: localDate.toISOString(),
+        date: data.date, // YYYY-MM-DD
         time: data.time,
         price: data.isFree ? 0 : Number(data.price || 0),
         contact: data.contact || "",
