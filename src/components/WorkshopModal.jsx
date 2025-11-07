@@ -135,7 +135,13 @@ export default function WorkshopModal({
               rel="noopener noreferrer"
               className="text-sky-700 hover:underline"
             >
-              Ver perfil
+              {(() => {
+                // Extraer el @ de la URL de Instagram
+                const url = workshop.social;
+                const match = url.match(/instagram\.com\/([^/?]+)/);
+                const username = match ? match[1] : null;
+                return username ? `@${username}` : "Ver perfil";
+              })()}
             </a>
           </p>
         )}

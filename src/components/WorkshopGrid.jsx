@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useDate } from "../context/DateContext";
+import { useFilters } from "../context/FilterContext";
 import WorkshopModal from "./WorkshopModal";
 import { getLocalDateString, formatDateForDisplay } from "../utils/formatDateLocal";
 
@@ -10,6 +11,7 @@ export default function WorkshopGrid() {
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { selectedDate, setSelectedDate } = useDate();
+  const { selectedCategory, selectedPrice, selectedModality } = useFilters();
   const ITEMS_PER_PAGE = 9;
 
   // 🔥 Obtener talleres aprobados en tiempo real desde Firestore
@@ -32,13 +34,55 @@ export default function WorkshopGrid() {
     return () => unsubscribe();
   }, []);
 
-  // 🎯 Filtrar talleres por fecha seleccionada
-  const filteredWorkshops = selectedDate
-    ? workshops.filter((w) => {
-        const workshopDate = getLocalDateString(w.date);
-        return workshopDate === selectedDate;
-      })
-    : workshops;
+  // 🎯 Filtrar talleres por fecha y otros filtros
+  const filteredWorkshops = workshops.filter((w) => {
+    // Filtro por fecha
+    if (selectedDate) {
+      const workshopDate = getLocalDateString(w.date);
+      if (workshopDate !== selectedDate) return false;
+    }
+
+    // Filtro por categoría
+    if (selectedCategory) {
+      const workshopCategories = Array.isArray(w.category) ? w.category : [w.category];
+      if (!workshopCategories.includes(selectedCategory)) return false;
+    }
+
+    // Filtro por precio
+    if (selectedPrice) {
+      // Si el precio se confirma al inscribirse, excluirlo del filtro de "Gratis"
+      if (w.confirmPriceOnRegistration && selectedPrice === "free") {
+        return false;
+      }
+
+      const price = w.price || 0;
+      switch (selectedPrice) {
+        case "free":
+          // Solo mostrar si es gratis Y no tiene precio a confirmar
+          if (price !== 0 || w.confirmPriceOnRegistration) return false;
+          break;
+        case "0-10000":
+          if (price === 0 || price > 10000) return false;
+          break;
+        case "10000-30000":
+          if (price < 10000 || price > 30000) return false;
+          break;
+        case "30000-50000":
+          if (price < 30000 || price > 50000) return false;
+          break;
+        case "50000+":
+          if (price < 50000) return false;
+          break;
+      }
+    }
+
+    // Filtro por modalidad
+    if (selectedModality) {
+      if (w.modality !== selectedModality) return false;
+    }
+
+    return true;
+  });
 
   // 📄 Paginación
   const totalPages = Math.ceil(filteredWorkshops.length / ITEMS_PER_PAGE);
@@ -46,10 +90,10 @@ export default function WorkshopGrid() {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedWorkshops = filteredWorkshops.slice(startIndex, endIndex);
 
-  // Resetear a página 1 cuando cambia el filtro de fecha
+  // Resetear a página 1 cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedDate, filteredWorkshops.length]);
+  }, [selectedDate, selectedCategory, selectedPrice, selectedModality, filteredWorkshops.length]);
 
   // Navegación de páginas
   const goToPage = (page) => {
