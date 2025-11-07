@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, updateDoc, deleteDoc, doc } from "firebase/firestore";
-import { db } from "../firebase/config";
+import { db, auth } from "../firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import WorkshopModal from "./WorkshopModal";
 
 export default function AdminPanel() {
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  // Verificar autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        navigate("/login");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
 
   // 🔥 Escuchar talleres pendientes
   useEffect(() => {
@@ -23,6 +40,11 @@ export default function AdminPanel() {
 
   // ✅ Aprobar
   const handleApprove = async (id) => {
+    if (!isAuthenticated || !auth.currentUser) {
+      alert("❌ Debes estar autenticado para aprobar talleres.");
+      navigate("/login");
+      return;
+    }
     try {
       setLoading(true);
       await updateDoc(doc(db, "workshops", id), {
@@ -32,7 +54,14 @@ export default function AdminPanel() {
       alert("✅ Taller aprobado correctamente.");
     } catch (err) {
       console.error("Error al aprobar:", err);
-      alert("❌ Error al aprobar el taller.");
+      const errorMessage = err.message || "Error desconocido";
+      if (errorMessage.includes("permission") || errorMessage.includes("Permission")) {
+        alert("❌ Error: No tienes permisos para aprobar talleres. Asegúrate de estar autenticado.");
+      } else if (errorMessage.includes("400") || errorMessage.includes("Bad Request")) {
+        alert(`❌ Error 400: ${errorMessage}. Verifica que los datos sean válidos.`);
+      } else {
+        alert(`❌ Error al aprobar el taller: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -40,6 +69,11 @@ export default function AdminPanel() {
 
   // 🚫 Rechazar
   const handleReject = async (id) => {
+    if (!isAuthenticated || !auth.currentUser) {
+      alert("❌ Debes estar autenticado para rechazar talleres.");
+      navigate("/login");
+      return;
+    }
     try {
       setLoading(true);
       await updateDoc(doc(db, "workshops", id), {
@@ -49,7 +83,14 @@ export default function AdminPanel() {
       alert("🚫 Taller rechazado.");
     } catch (err) {
       console.error("Error al rechazar:", err);
-      alert("❌ Error al rechazar el taller.");
+      const errorMessage = err.message || "Error desconocido";
+      if (errorMessage.includes("permission") || errorMessage.includes("Permission")) {
+        alert("❌ Error: No tienes permisos para rechazar talleres. Asegúrate de estar autenticado.");
+      } else if (errorMessage.includes("400") || errorMessage.includes("Bad Request")) {
+        alert(`❌ Error 400: ${errorMessage}. Verifica que los datos sean válidos.`);
+      } else {
+        alert(`❌ Error al rechazar el taller: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }

@@ -53,18 +53,20 @@ export default function WorkshopGrid() {
           filteredWorkshops.map((w) => (
             <div
               key={w.id}
-              className="border rounded-xl p-3 bg-white hover:shadow-lg cursor-pointer transition duration-200"
+              className="border-2 border-black rounded-2xl p-3 bg-white shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
               onClick={() => setSelectedWorkshop(w)}
             >
               {/* Imagen */}
               {w.image ? (
-                <img
-                  src={w.image}
-                  alt={w.name}
-                  className="w-full h-40 object-cover rounded-md"
-                />
+                <div className="w-full min-h-[200px] max-h-[300px] flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
+                  <img
+                    src={w.image}
+                    alt={w.name}
+                    className="max-w-full max-h-full w-auto h-auto object-contain"
+                  />
+                </div>
               ) : (
-                <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm border-2 border-black rounded-lg">
                   Sin imagen
                 </div>
               )}

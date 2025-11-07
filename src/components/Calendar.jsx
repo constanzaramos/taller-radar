@@ -82,19 +82,19 @@ export default function Calendar() {
   };
 
   return (
-    <div className="bg-white border rounded-xl p-4 shadow-sm text-sm">
+    <div className="bg-[#24cbb6] border-2 border-black rounded-2xl p-4 shadow-[4px_4px_0_#000] text-sm">
       {/* Header de navegación */}
       <div className="flex justify-between items-center mb-3">
         <button
           onClick={handlePrevMonth}
-          className="p-1 text-sky-700 hover:text-sky-900 transition"
+          className="p-1 text-black font-bold"
         >
           ◀
         </button>
         <h3 className="font-semibold capitalize">{monthName}</h3>
         <button
           onClick={handleNextMonth}
-          className="p-1 text-sky-700 hover:text-sky-900 transition"
+          className="p-1 text-black font-bold"
         >
           ▶
         </button>
@@ -125,14 +125,14 @@ export default function Calendar() {
               key={i}
               disabled={past}
               onClick={() => handleSelectDay(day)}
-              className={`m-1 p-2 rounded-lg transition-all ${
+              className={`m-1 min-w-[2.5rem] w-10 h-10 flex items-center justify-center rounded-lg transition-all border-2 ${
                 past
-                  ? "text-neutral-400 cursor-not-allowed"
+                  ? "text-neutral-400 cursor-not-allowed border-transparent"
                   : isSelected
-                  ? "bg-sky-700 text-white font-semibold"
+                  ? "bg-orange text-black font-bold border-black shadow-[2px_2px_0_#000]"
                   : todayCheck
-                  ? "border border-sky-500 text-sky-700 font-medium"
-                  : "hover:bg-sky-100 text-neutral-700"
+                  ? "border-sky-500 text-sky-700 font-medium border-transparent hover:border-sky-500"
+                  : "border-transparent hover:bg-white/50 text-black"
               }`}
             >
               {day.getDate()}

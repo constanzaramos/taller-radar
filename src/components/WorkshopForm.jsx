@@ -4,7 +4,6 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
 import { uploadToImgBB } from "../utils/uploadToImgBB";
 
-
 export default function WorkshopForm() {
   const {
     register,
@@ -25,7 +24,9 @@ export default function WorkshopForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [preview, setPreview] = useState("");
+
   const modality = watch("modality");
+  const isRecurring = watch("isRecurring");
 
   const categories = [
     "Creatividad y artes",
@@ -47,16 +48,21 @@ export default function WorkshopForm() {
     try {
       setLoading(true);
 
-      // 🖼️ Subir imagen (ImgBB)
+      // Subir imagen (opcional - si falla, continuamos sin imagen)
       let imageUrl = "";
       const fileFromForm = data.imageFile && data.imageFile[0];
       const fileFromDom = document.getElementById("imageInput")?.files?.[0];
       const file = fileFromForm || fileFromDom;
       if (file) {
-        imageUrl = await uploadToImgBB(file);
+        try {
+          imageUrl = await uploadToImgBB(file);
+        } catch (imgError) {
+          console.warn("No se pudo subir la imagen, continuando sin ella:", imgError);
+          // Continuamos sin imagen en lugar de fallar todo el formulario
+        }
       }
 
-      // 🔗 Redes sociales (solo arrobas)
+      // Redes sociales (solo arrobas)
       const socials = data.social
         .map((s) => s.handle.trim())
         .filter(Boolean)
@@ -65,7 +71,7 @@ export default function WorkshopForm() {
           return `https://instagram.com/${username}`;
         });
 
-      // 🗺 Crear dirección y mapa
+      // Dirección + mapa
       let fullAddress = "";
       let mapUrl = "";
       if (data.modality === "presencial" && data.address) {
@@ -73,9 +79,7 @@ export default function WorkshopForm() {
         mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`;
       }
 
-      // 🗓 Guardar la fecha tal como viene del input (YYYY-MM-DD) para evitar desfases
-
-      // 📦 Datos a guardar
+      // Datos a guardar
       const formattedData = {
         name: data.name.trim(),
         category: [data.category],
@@ -84,9 +88,14 @@ export default function WorkshopForm() {
         commune: data.commune || "",
         city: data.city || "",
         fullAddress,
-        date: data.date, // YYYY-MM-DD
+        date: data.date,
         time: data.time,
         price: data.isFree ? 0 : Number(data.price || 0),
+        ageMin: data.ageMin ? Number(data.ageMin) : null,
+        isRecurring: data.isRecurring || false,
+        recurringDays: data.recurringDays || [],
+        recurringStart: data.recurringStart || null,
+        recurringEnd: data.recurringEnd || null,
         contact: data.contact || "",
         social: socials,
         image: imageUrl,
@@ -98,13 +107,13 @@ export default function WorkshopForm() {
       };
 
       await addDoc(collection(db, "workshops"), formattedData);
-
       setSuccess(true);
       reset();
       setPreview("");
     } catch (err) {
       console.error("Error al guardar taller:", err);
-      alert("❌ Error al guardar el taller.");
+      const errorMessage = err.message || "Error desconocido";
+      alert(`❌ Error al guardar el taller: ${errorMessage}`);
     } finally {
       setLoading(false);
       setTimeout(() => setSuccess(false), 3000);
@@ -112,8 +121,8 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-white border rounded-xl p-6 max-w-4xl mx-auto">
-      <h3 className="font-semibold text-lg mb-4">Publicar un taller</h3>
+    <div className="bg-white border border-gray-300 rounded-xl p-6 max-w-4xl mx-auto shadow-sm">
+      <h3 className="font-semibold text-lg mb-4 text-gray-800">Publicar un taller</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4 text-sm">
         {/* Nombre */}
@@ -186,7 +195,47 @@ export default function WorkshopForm() {
           </select>
         </div>
 
-        {/* Precio / Gratis */}
+        {/* Edad mínima */}
+        <div>
+          <input
+            type="number"
+            {...register("ageMin", {
+              min: { value: 1, message: "Debe ser mayor o igual a 1" },
+              max: { value: 99, message: "Debe ser menor a 99" },
+            })}
+            placeholder="Edad mínima (opcional)"
+            className="border rounded-lg p-2 w-full"
+          />
+          {errors.ageMin && <p className="text-red-600 text-xs">{errors.ageMin.message}</p>}
+        </div>
+
+        {/* Taller recurrente */}
+        <div className="col-span-2 border-t pt-3">
+          <label className="flex items-center gap-2 font-medium">
+            <input type="checkbox" {...register("isRecurring")} />
+            <span>Taller recurrente</span>
+          </label>
+
+          {isRecurring && (
+            <div className="mt-3 space-y-2 border rounded-lg p-3 bg-gray-50">
+              <div className="text-sm font-medium">Selecciona los días:</div>
+              <div className="flex flex-wrap gap-2 text-sm">
+                {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day) => (
+                  <label key={day} className="flex items-center gap-1">
+                    <input type="checkbox" value={day} {...register("recurringDays")} />
+                    {day.slice(0, 3)}
+                  </label>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input type="date" {...register("recurringStart")} className="border rounded-lg p-2 w-full" />
+                <input type="date" {...register("recurringEnd")} className="border rounded-lg p-2 w-full" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Precio */}
         <div className="col-span-2 flex items-center gap-4">
           <input
             type="number"
@@ -202,14 +251,12 @@ export default function WorkshopForm() {
 
         {/* Inscripciones */}
         <div className="col-span-2 border-t pt-4">
-          <h4 className="font-semibold mb-2">📋 Inscripciones</h4>
-
+          <h4 className="font-semibold mb-2">Inscripciones</h4>
           <input
             {...register("contact")}
             className="border rounded-lg p-2 w-full mb-3"
             placeholder="Correo o teléfono (opcional)"
           />
-
           {fields.map((item, index) => (
             <div key={item.id} className="flex items-center gap-2 mb-2">
               <input
@@ -227,7 +274,6 @@ export default function WorkshopForm() {
               </button>
             </div>
           ))}
-
           <button type="button" onClick={() => append({ handle: "" })} className="text-sky-700 text-sm hover:underline">
             + Agregar otra red
           </button>
@@ -235,7 +281,7 @@ export default function WorkshopForm() {
 
         {/* Imagen */}
         <div className="col-span-2 border-t pt-4">
-          <h4 className="font-semibold mb-2">🖼️ Imagen del taller</h4>
+          <h4 className="font-semibold mb-2">Imagen del taller</h4>
           <button
             type="button"
             onClick={() => document.getElementById("imageInput").click()}
@@ -245,7 +291,6 @@ export default function WorkshopForm() {
           >
             {preview ? "Cambiar imagen" : "Subir imagen"}
           </button>
-
           <input
             type="file"
             accept="image/*"
@@ -256,7 +301,6 @@ export default function WorkshopForm() {
             }}
             className="hidden"
           />
-
           {preview && (
             <div className="mt-3">
               <img src={preview} alt="Vista previa" className="w-full h-48 object-cover rounded-xl border" />
@@ -297,9 +341,7 @@ export default function WorkshopForm() {
           {loading ? "Guardando..." : "Enviar taller"}
         </button>
 
-        {success && (
-          <p className="col-span-2 text-green-600 mt-2 font-medium">✅ Taller enviado para revisión</p>
-        )}
+        {success && <p className="col-span-2 text-green-600 mt-2 font-medium">✅ Taller enviado para revisión</p>}
       </form>
     </div>
   );
