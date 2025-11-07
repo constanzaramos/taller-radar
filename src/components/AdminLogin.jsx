@@ -34,12 +34,12 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fdfcf9]">
+    <div className="min-h-screen flex items-center justify-center bg-[#fdfcf9] px-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white border rounded-xl p-6 w-full max-w-sm shadow-md"
+        className="bg-white border rounded-xl p-4 sm:p-6 w-full max-w-sm shadow-md"
       >
-        <h2 className="text-xl font-semibold mb-4 text-center">Login Admin</h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4 text-center">Login Admin</h2>
 
         <input
           type="email"

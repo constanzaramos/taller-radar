@@ -4,12 +4,14 @@ import { db, auth } from "../firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import WorkshopModal from "./WorkshopModal";
+import AdminWorkshopForm from "./AdminWorkshopForm";
 
 export default function AdminPanel() {
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const navigate = useNavigate();
 
   // Verificar autenticación
@@ -103,15 +105,49 @@ export default function AdminPanel() {
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 font-body">
-      <h2 className="text-3xl font-display mb-6 text-center">🛠️ Panel de Moderación</h2>
+  const handleFormSuccess = () => {
+    setShowForm(false);
+    // Los talleres se actualizarán automáticamente con el listener
+  };
 
-      {workshops.length === 0 ? (
-        <p className="text-center text-neutral-500 italic">No hay talleres pendientes por revisar.</p>
+  return (
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 font-body">
+      <h2 className="text-2xl sm:text-3xl font-display mb-4 sm:mb-6 text-center">🛠️ Panel de Administración</h2>
+
+      {/* Toggle entre vista de moderación y formulario */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6 justify-center">
+        <button
+          onClick={() => setShowForm(false)}
+          className={`px-3 sm:px-4 py-2 rounded-lg border-2 border-black font-semibold text-sm sm:text-base ${
+            !showForm
+              ? "bg-mint shadow-[2px_2px_0_#000]"
+              : "bg-white hover:bg-gray-50"
+          }`}
+        >
+          📋 Moderar Talleres
+        </button>
+        <button
+          onClick={() => setShowForm(true)}
+          className={`px-3 sm:px-4 py-2 rounded-lg border-2 border-black font-semibold text-sm sm:text-base ${
+            showForm
+              ? "bg-green-500 text-white shadow-[2px_2px_0_#000]"
+              : "bg-white hover:bg-gray-50"
+          }`}
+        >
+          ➕ Crear Taller
+        </button>
+      </div>
+
+      {showForm ? (
+        <AdminWorkshopForm onSuccess={handleFormSuccess} />
       ) : (
-        <div className="bg-cream border-2 border-black rounded-2xl p-4 shadow-[4px_4px_0_#000]">
-          <table className="w-full text-sm">
+        <>
+          {workshops.length === 0 ? (
+        <p className="text-center text-neutral-500 italic text-sm sm:text-base">No hay talleres pendientes por revisar.</p>
+      ) : (
+        <div className="bg-cream border-2 border-black rounded-2xl p-3 sm:p-4 shadow-[4px_4px_0_#000] overflow-x-auto">
+          {/* Tabla desktop */}
+          <table className="w-full text-xs sm:text-sm hidden md:table">
             <thead>
               <tr className="border-b border-black text-left bg-mint">
                 <th className="py-3 px-2 font-semibold">Taller</th>
@@ -134,20 +170,20 @@ export default function AdminPanel() {
                     <button
                       disabled={loading}
                       onClick={() => handleApprove(w.id)}
-                      className="bg-mint border-2 border-black px-3 py-1 text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
+                      className="bg-mint border-2 border-black px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
                     >
                       ✅ Aprobar
                     </button>
                     <button
                       disabled={loading}
                       onClick={() => handleReject(w.id)}
-                      className="bg-orange border-2 border-black px-3 py-1 text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
+                      className="bg-orange border-2 border-black px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
                     >
                       ❌ Rechazar
                     </button>
                     <button
                       onClick={() => handleDelete(w.id)}
-                      className="bg-red-400 border-2 border-black px-3 py-1 text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
+                      className="bg-red-400 border-2 border-black px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
                     >
                       🗑️ Eliminar
                     </button>
@@ -156,6 +192,45 @@ export default function AdminPanel() {
               ))}
             </tbody>
           </table>
+
+          {/* Cards móvil */}
+          <div className="md:hidden space-y-3">
+            {workshops.map((w) => (
+              <div
+                key={w.id}
+                className="bg-white border-2 border-black rounded-lg p-3 shadow-[2px_2px_0_#000]"
+              >
+                <h3
+                  className="font-semibold text-sm mb-2 cursor-pointer text-sky-800 hover:underline"
+                  onClick={() => setSelectedWorkshop(w)}
+                >
+                  {w.name}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    disabled={loading}
+                    onClick={() => handleApprove(w.id)}
+                    className="bg-mint border-2 border-black px-3 py-1.5 text-xs rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px] flex-1 min-w-[80px]"
+                  >
+                    ✅ Aprobar
+                  </button>
+                  <button
+                    disabled={loading}
+                    onClick={() => handleReject(w.id)}
+                    className="bg-orange border-2 border-black px-3 py-1.5 text-xs rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px] flex-1 min-w-[80px]"
+                  >
+                    ❌ Rechazar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(w.id)}
+                    className="bg-red-400 border-2 border-black px-3 py-1.5 text-xs rounded-full shadow-[2px_2px_0_#000] hover:translate-y-[1px] flex-1 min-w-[80px]"
+                  >
+                    🗑️ Eliminar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -168,6 +243,8 @@ export default function AdminPanel() {
           onApprove={() => handleApprove(selectedWorkshop.id)}
           onReject={() => handleReject(selectedWorkshop.id)}
         />
+      )}
+        </>
       )}
     </div>
   );

@@ -82,26 +82,30 @@ export default function Calendar() {
   };
 
   return (
-    <div className="bg-[#24cbb6] border-2 border-black rounded-2xl p-4 shadow-[4px_4px_0_#000] text-sm">
+    <div className="bg-[#24cbb6] border-2 border-black rounded-2xl p-3 sm:p-4 shadow-[4px_4px_0_#000] text-xs sm:text-sm">
       {/* Header de navegación */}
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-2 sm:mb-3">
         <button
           onClick={handlePrevMonth}
-          className="p-1 text-black font-bold"
+          className="p-1 sm:p-2 text-black font-bold hover:bg-white/30 rounded transition"
+          aria-label="Mes anterior"
         >
           ◀
         </button>
-        <h3 className="font-semibold capitalize">{monthName}</h3>
+        <h3 className="font-semibold capitalize text-xs sm:text-sm md:text-base px-2 text-center">
+          {monthName}
+        </h3>
         <button
           onClick={handleNextMonth}
-          className="p-1 text-black font-bold"
+          className="p-1 sm:p-2 text-black font-bold hover:bg-white/30 rounded transition"
+          aria-label="Mes siguiente"
         >
           ▶
         </button>
       </div>
 
       {/* Días de la semana */}
-      <div className="grid grid-cols-7 text-center font-medium text-neutral-700">
+      <div className="grid grid-cols-7 text-center font-medium text-neutral-700 text-xs sm:text-sm mb-1">
         <div>L</div>
         <div>M</div>
         <div>M</div>
@@ -112,7 +116,7 @@ export default function Calendar() {
       </div>
 
       {/* Días del mes */}
-      <div className="grid grid-cols-7 text-center mt-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center mt-1">
         {days.map((day, i) => {
           if (!day) return <div key={i}></div>;
 
@@ -125,7 +129,7 @@ export default function Calendar() {
               key={i}
               disabled={past}
               onClick={() => handleSelectDay(day)}
-              className={`m-1 min-w-[2.5rem] w-10 h-10 flex items-center justify-center rounded-lg transition-all border-2 ${
+              className={`min-w-[1.75rem] sm:min-w-[2.5rem] w-7 h-7 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition-all border-2 text-xs sm:text-sm ${
                 past
                   ? "text-neutral-400 cursor-not-allowed border-transparent"
                   : isSelected

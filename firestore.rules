@@ -6,9 +6,17 @@ service cloud.firestore {
       // Permitir lectura pública de todos los workshops
       allow read: if true;
       
-      // Permitir escritura pública para crear nuevos workshops
+      // Permitir escritura pública para crear nuevos workshops (solo pendientes)
       // Con validaciones básicas de seguridad
-      allow create: if request.resource.data.keys().hasAll([
+      allow create: if (
+          // Si el usuario NO está autenticado, solo puede crear pendientes
+          (request.auth == null 
+            && request.resource.data.status == 'pending'
+            && request.resource.data.approved == false)
+          // Si el usuario está autenticado, puede crear aprobados o pendientes
+          || (request.auth != null)
+        )
+        && request.resource.data.keys().hasAll([
           'name',
           'category',
           'modality',
@@ -19,8 +27,6 @@ service cloud.firestore {
           'approved',
           'createdAt'
         ])
-        && request.resource.data.status == 'pending'
-        && request.resource.data.approved == false
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.description is string

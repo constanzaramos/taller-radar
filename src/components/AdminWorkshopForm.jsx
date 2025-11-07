@@ -1,10 +1,10 @@
 import { useForm, useFieldArray } from "react-hook-form";
-import { db } from "../firebase/config";
+import { db, auth } from "../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
 import { uploadToImgBB } from "../utils/uploadToImgBB";
 
-export default function WorkshopForm() {
+export default function AdminWorkshopForm({ onSuccess }) {
   const {
     register,
     handleSubmit,
@@ -54,20 +54,24 @@ export default function WorkshopForm() {
   }
 
   const onSubmit = async (data) => {
+    if (!auth.currentUser) {
+      alert("❌ Debes estar autenticado para crear talleres.");
+      return;
+    }
+
     try {
       setLoading(true);
 
       // Subir imagen (opcional - si falla, continuamos sin imagen)
       let imageUrl = "";
       const fileFromForm = data.imageFile && data.imageFile[0];
-      const fileFromDom = document.getElementById("imageInput")?.files?.[0];
+      const fileFromDom = document.getElementById("adminImageInput")?.files?.[0];
       const file = fileFromForm || fileFromDom;
       if (file) {
         try {
           imageUrl = await uploadToImgBB(file);
         } catch (imgError) {
           console.warn("No se pudo subir la imagen, continuando sin ella:", imgError);
-          // Continuamos sin imagen en lugar de fallar todo el formulario
         }
       }
 
@@ -88,7 +92,7 @@ export default function WorkshopForm() {
         mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`;
       }
 
-      // Datos a guardar
+      // Datos a guardar - DIRECTAMENTE APROBADO
       const formattedData = {
         name: data.name.trim(),
         category: [data.category],
@@ -113,16 +117,22 @@ export default function WorkshopForm() {
         social: socials,
         image: imageUrl,
         description: data.description,
-        status: "pending",
-        approved: false,
+        status: "approved", // ✅ Directamente aprobado
+        approved: true, // ✅ Directamente aprobado
+        confirmPriceOnRegistration: data.confirmPriceOnRegistration || false,
+        confirmAddressOnRegistration: data.confirmAddressOnRegistration || false,
         mapUrl,
         createdAt: serverTimestamp(),
+        createdBy: auth.currentUser.uid, // Guardar quién lo creó
       };
 
-      await addDoc(collection(db, "workshops"), formattedData);
+      const docRef = await addDoc(collection(db, "workshops"), formattedData);
+      console.log("Taller creado con ID:", docRef.id);
+      console.log("Datos guardados:", formattedData);
       setSuccess(true);
       reset();
       setPreview("");
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Error al guardar taller:", err);
       const errorMessage = err.message || "Error desconocido";
@@ -134,8 +144,8 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-xl p-4 sm:p-6 max-w-4xl mx-auto shadow-sm">
-      <h3 className="font-semibold text-base sm:text-lg mb-4 text-gray-800">Publicar un taller</h3>
+    <div className="bg-white border-2 border-black rounded-xl p-4 sm:p-6 max-w-4xl mx-auto shadow-[4px_4px_0_#000]">
+      <h3 className="font-semibold text-base sm:text-lg mb-4 text-gray-800">➕ Crear Taller (Aprobado Directamente)</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
         {/* Nombre */}
@@ -186,6 +196,12 @@ export default function WorkshopForm() {
             />
             <input {...register("commune")} className="border rounded-lg p-2" placeholder="Comuna" />
             <input {...register("city")} className="border rounded-lg p-2" placeholder="Ciudad" />
+            <div className="col-span-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" {...register("confirmAddressOnRegistration")} />
+                <span>📍 Confirmar dirección al momento de la inscripción</span>
+              </label>
+            </div>
           </>
         )}
 
@@ -323,16 +339,22 @@ export default function WorkshopForm() {
 
 
         {/* Precio */}
-        <div className="col-span-2 flex items-center gap-4">
-          <input
-            type="number"
-            {...register("price", { min: { value: 0, message: "Debe ser mayor o igual a 0" } })}
-            className="border rounded-lg p-2 w-full"
-            placeholder="Precio (CLP)"
-          />
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register("isFree")} />
-            <span>Gratis</span>
+        <div className="col-span-2 space-y-2">
+          <div className="flex items-center gap-4">
+            <input
+              type="number"
+              {...register("price", { min: { value: 0, message: "Debe ser mayor o igual a 0" } })}
+              className="border rounded-lg p-2 w-full"
+              placeholder="Precio (CLP)"
+            />
+            <label className="flex items-center gap-2">
+              <input type="checkbox" {...register("isFree")} />
+              <span>Gratis</span>
+            </label>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" {...register("confirmPriceOnRegistration")} />
+            <span>💰 Confirmar precio al momento de la inscripción</span>
           </label>
         </div>
 
@@ -371,7 +393,7 @@ export default function WorkshopForm() {
           <h4 className="font-semibold mb-2">Imagen del taller</h4>
           <button
             type="button"
-            onClick={() => document.getElementById("imageInput").click()}
+            onClick={() => document.getElementById("adminImageInput").click()}
             className={`flex items-center gap-2 ${
               preview ? "bg-green-600 hover:bg-green-700" : "bg-sky-700 hover:bg-sky-800"
             } text-white px-4 py-2 rounded-lg transition`}
@@ -381,7 +403,7 @@ export default function WorkshopForm() {
           <input
             type="file"
             accept="image/*"
-            id="imageInput"
+            id="adminImageInput"
             {...register("imageFile")}
             onChange={(e) => {
               if (e.target.files[0]) setPreview(URL.createObjectURL(e.target.files[0]));
@@ -395,7 +417,7 @@ export default function WorkshopForm() {
                 type="button"
                 onClick={() => {
                   setPreview("");
-                  document.getElementById("imageInput").value = "";
+                  document.getElementById("adminImageInput").value = "";
                 }}
                 className="mt-2 text-sm text-red-500 hover:underline"
               >
@@ -422,14 +444,17 @@ export default function WorkshopForm() {
         <button
           disabled={loading}
           className={`col-span-2 rounded-lg px-4 py-2 text-white ${
-            loading ? "bg-gray-400" : "bg-sky-700 hover:bg-sky-800"
+            loading ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"
           }`}
         >
-          {loading ? "Guardando..." : "Enviar taller"}
+          {loading ? "Guardando..." : "✅ Crear Taller (Aprobado)"}
         </button>
 
-        {success && <p className="col-span-2 text-green-600 mt-2 font-medium">✅ Taller enviado para revisión</p>}
+        {success && (
+          <p className="col-span-2 text-green-600 mt-2 font-medium">✅ Taller creado y aprobado correctamente</p>
+        )}
       </form>
     </div>
   );
 }
+

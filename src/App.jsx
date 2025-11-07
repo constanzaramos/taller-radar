@@ -19,10 +19,10 @@ export default function App() {
           element={
             <div className="min-h-screen bg-[#fdfcf9] text-neutral-900">
               <NavBar />
-              <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
+              <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8 lg:space-y-10">
                 <Hero />
-                <section className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="lg:col-span-1 space-y-4">
+                <section className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div className="lg:col-span-1 space-y-3 sm:space-y-4">
                     <Calendar />
                     <Filters />
                   </div>
