@@ -134,8 +134,8 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-white border border-gray-300 rounded-xl p-4 sm:p-6 max-w-4xl mx-auto shadow-sm">
-      <h3 className="font-semibold text-base sm:text-lg mb-4 text-gray-800">Publicar un taller</h3>
+    <div className="bg-[#FE9B55] border-2 border-black rounded-xl p-4 sm:p-6 max-w-4xl mx-auto shadow-[4px_4px_0_#000]">
+      <h3 className="font-semibold text-base sm:text-lg mb-4 text-white">Publicar un taller</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
         {/* Nombre */}
@@ -145,7 +145,7 @@ export default function WorkshopForm() {
               required: "El nombre es obligatorio",
               minLength: { value: 2, message: "Debe tener al menos 2 caracteres" },
             })}
-            className="border rounded-lg p-2 w-full"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
             placeholder="Nombre del taller *"
           />
           {errors.name && <p className="text-red-600 text-xs">{errors.name.message}</p>}
@@ -155,7 +155,7 @@ export default function WorkshopForm() {
         <div>
           <select
             {...register("category", { required: "Selecciona una categoría" })}
-            className="border rounded-lg p-2 w-full"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black"
           >
             <option value="">Seleccionar categoría *</option>
             {categories.map((c) => (
@@ -166,12 +166,12 @@ export default function WorkshopForm() {
 
         {/* Modalidad */}
         <div className="col-span-2 flex gap-6 items-center">
-          <label className="flex items-center gap-2">
-            <input type="radio" value="presencial" {...register("modality", { required: true })} />
+          <label className="flex items-center gap-2 text-white">
+            <input type="radio" value="presencial" {...register("modality", { required: true })} className="text-orange-600" />
             <span>Presencial</span>
           </label>
-          <label className="flex items-center gap-2">
-            <input type="radio" value="online" {...register("modality", { required: true })} />
+          <label className="flex items-center gap-2 text-white">
+            <input type="radio" value="online" {...register("modality", { required: true })} className="text-orange-600" />
             <span>Online</span>
           </label>
         </div>
@@ -181,28 +181,28 @@ export default function WorkshopForm() {
           <>
             <input
               {...register("address")}
-              className="border rounded-lg p-2 col-span-2"
+              className="bg-white border border-gray-300 rounded-lg p-2 col-span-2 text-black placeholder-gray-500"
               placeholder="Dirección exacta (Ej: Av. Italia 1234)"
             />
-            <input {...register("commune")} className="border rounded-lg p-2" placeholder="Comuna" />
-            <input {...register("city")} className="border rounded-lg p-2" placeholder="Ciudad" />
+            <input {...register("commune")} className="bg-white border border-gray-300 rounded-lg p-2 text-black placeholder-gray-500" placeholder="Comuna" />
+            <input {...register("city")} className="bg-white border border-gray-300 rounded-lg p-2 text-black placeholder-gray-500" placeholder="Ciudad" />
           </>
         )}
 
         {/* Tipo de fecha */}
-        <div className="col-span-2 border-t pt-3">
-          <div className="text-sm font-medium mb-2">Tipo de taller:</div>
+        <div className="col-span-2 border-t border-white/30 pt-3">
+          <div className="text-sm font-medium mb-2 text-white">Tipo de taller:</div>
           <div className="flex flex-wrap gap-3 mb-3">
-            <label className="flex items-center gap-2">
-              <input type="radio" value="single" {...register("dateType")} />
+            <label className="flex items-center gap-2 text-white">
+              <input type="radio" value="single" {...register("dateType")} className="text-orange-600" />
               <span>Fecha única</span>
             </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" value="multiple" {...register("dateType")} />
+            <label className="flex items-center gap-2 text-white">
+              <input type="radio" value="multiple" {...register("dateType")} className="text-orange-600" />
               <span>Múltiples fechas específicas</span>
             </label>
-            <label className="flex items-center gap-2">
-              <input type="radio" value="recurring" {...register("dateType")} />
+            <label className="flex items-center gap-2 text-white">
+              <input type="radio" value="recurring" {...register("dateType")} className="text-orange-600" />
               <span>Taller recurrente</span>
             </label>
           </div>
@@ -213,7 +213,7 @@ export default function WorkshopForm() {
               <input
                 type="date"
                 {...register("date", { required: dateType === "single" ? "Selecciona una fecha" : false })}
-                className="border rounded-lg p-2 w-full"
+                className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black"
                 placeholder="Fecha del taller"
               />
             </div>
@@ -221,8 +221,8 @@ export default function WorkshopForm() {
 
           {/* Múltiples fechas específicas */}
           {dateType === "multiple" && (
-            <div className="space-y-2 border rounded-lg p-3 bg-gray-50">
-              <div className="text-sm font-medium mb-2">Agregar fechas específicas:</div>
+            <div className="space-y-2 border border-gray-300 rounded-lg p-3 bg-white/20">
+              <div className="text-sm font-medium mb-2 text-white">Agregar fechas específicas:</div>
               {dateFields.map((field, index) => (
                 <div key={field.id} className="flex items-center gap-2">
                   <input
@@ -230,7 +230,7 @@ export default function WorkshopForm() {
                     {...register(`multipleDates.${index}.date`, { 
                       required: dateType === "multiple" && index === 0 ? "Agrega al menos una fecha" : false 
                     })}
-                    className="border rounded-lg p-2 flex-1"
+                    className="bg-white border border-gray-300 rounded-lg p-2 flex-1 text-black placeholder-gray-500"
                     placeholder="Fecha"
                   />
                   {dateFields.length > 1 && (
@@ -247,7 +247,7 @@ export default function WorkshopForm() {
               <button
                 type="button"
                 onClick={() => appendDate({ date: "" })}
-                className="text-sky-700 text-sm hover:underline"
+                className="text-white text-sm hover:underline"
               >
                 + Agregar otra fecha
               </button>
@@ -256,40 +256,40 @@ export default function WorkshopForm() {
 
           {/* Taller recurrente */}
           {dateType === "recurring" && (
-            <div className="space-y-2 border rounded-lg p-3 bg-gray-50">
-              <div className="text-sm font-medium">Selecciona los días de la semana:</div>
+            <div className="space-y-2 border border-gray-300 rounded-lg p-3 bg-white/20">
+              <div className="text-sm font-medium text-white">Selecciona los días de la semana:</div>
               <div className="flex flex-wrap gap-2 text-sm">
                 {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day) => (
-                  <label key={day} className="flex items-center gap-1">
-                    <input type="checkbox" value={day} {...register("recurringDays")} />
-                    {day.slice(0, 3)}
-                  </label>
+                <label key={day} className="flex items-center gap-1 text-white">
+                  <input type="checkbox" value={day} {...register("recurringDays")} className="text-orange-600" />
+                  {day.slice(0, 3)}
+                </label>
                 ))}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs text-gray-600">Fecha inicio:</label>
+                  <label className="text-xs text-white">Fecha inicio:</label>
                   <input 
                     type="date" 
                     {...register("recurringStart", { required: dateType === "recurring" ? "Fecha inicio requerida" : false })} 
-                    className="border rounded-lg p-2 w-full" 
+                    className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black" 
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-gray-600">Fecha fin:</label>
+                  <label className="text-xs text-white">Fecha fin:</label>
                   <input 
                     type="date" 
                     {...register("recurringEnd", { required: dateType === "recurring" ? "Fecha fin requerida" : false })} 
-                    className="border rounded-lg p-2 w-full" 
+                    className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black" 
                   />
                 </div>
               </div>
               <div>
-                <label className="text-xs text-gray-600">Número de clases/sesiones (opcional):</label>
+                <label className="text-xs text-white">Número de clases/sesiones (opcional):</label>
                 <input
                   type="number"
                   {...register("numberOfClasses", { min: 1 })}
-                  className="border rounded-lg p-2 w-full"
+                  className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
                   placeholder="Ej: 8 clases"
                 />
               </div>
@@ -299,7 +299,7 @@ export default function WorkshopForm() {
 
         {/* Hora */}
         <div>
-          <select {...register("time", { required: "Selecciona una hora" })} className="border rounded-lg p-2 w-full">
+          <select {...register("time", { required: "Selecciona una hora" })} className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black">
             <option value="">Seleccionar hora *</option>
             {times.map((t) => (
               <option key={t}>{t}</option>
@@ -316,7 +316,7 @@ export default function WorkshopForm() {
               max: { value: 99, message: "Debe ser menor a 99" },
             })}
             placeholder="Edad mínima (opcional)"
-            className="border rounded-lg p-2 w-full"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
           />
           {errors.ageMin && <p className="text-red-600 text-xs">{errors.ageMin.message}</p>}
         </div>
@@ -327,21 +327,21 @@ export default function WorkshopForm() {
           <input
             type="number"
             {...register("price", { min: { value: 0, message: "Debe ser mayor o igual a 0" } })}
-            className="border rounded-lg p-2 w-full"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
             placeholder="Precio (CLP)"
           />
-          <label className="flex items-center gap-2">
-            <input type="checkbox" {...register("isFree")} />
+          <label className="flex items-center gap-2 text-white">
+            <input type="checkbox" {...register("isFree")} className="text-orange-600" />
             <span>Gratis</span>
           </label>
         </div>
 
         {/* Inscripciones */}
-        <div className="col-span-2 border-t pt-4">
-          <h4 className="font-semibold mb-2">Inscripciones</h4>
+        <div className="col-span-2 border-t border-white/30 pt-4">
+          <h4 className="font-semibold mb-2 text-white">Inscripciones</h4>
           <input
             {...register("contact")}
-            className="border rounded-lg p-2 w-full mb-3"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full mb-3 text-black placeholder-gray-500"
             placeholder="Correo o teléfono (opcional)"
           />
           {fields.map((item, index) => (
@@ -353,7 +353,7 @@ export default function WorkshopForm() {
                     message: "Debe comenzar con @ y solo letras/números",
                   },
                 })}
-                className="border rounded-lg p-2 flex-1"
+                className="bg-white border border-gray-300 rounded-lg p-2 flex-1 text-black placeholder-gray-500"
                 placeholder="@usuario"
               />
               <button type="button" onClick={() => remove(index)} className="text-red-500 text-sm">
@@ -412,7 +412,7 @@ export default function WorkshopForm() {
               required: "La descripción es obligatoria",
               minLength: { value: 10, message: "Debe tener al menos 10 caracteres" },
             })}
-            className="border rounded-lg p-2 w-full"
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
             rows="3"
             placeholder="Descripción del taller *"
           />
@@ -421,11 +421,11 @@ export default function WorkshopForm() {
 
         <button
           disabled={loading}
-          className={`col-span-2 rounded-lg px-4 py-2 text-white ${
-            loading ? "bg-gray-400" : "bg-sky-700 hover:bg-sky-800"
+          className={`col-span-2 rounded-lg px-4 py-2 text-white font-bold border-2 border-black ${
+            loading ? "bg-gray-400" : "bg-[#FE9B55] hover:bg-[#e88a44] shadow-[2px_2px_0_#000]"
           }`}
         >
-          {loading ? "Guardando..." : "Enviar taller"}
+          {loading ? "Guardando..." : "ENVIAR TALLER"}
         </button>
 
         {success && <p className="col-span-2 text-green-600 mt-2 font-medium">✅ Taller enviado para revisión</p>}

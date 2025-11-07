@@ -17,7 +17,10 @@ export default function App() {
         <Route
           path="/"
           element={
-            <div className="min-h-screen bg-[#fdfcf9] text-neutral-900">
+            <div className="min-h-screen bg-white text-neutral-900" style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px)',
+              backgroundSize: '100% 4px'
+            }}>
               <NavBar />
               <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8 lg:space-y-10">
                 <Hero />

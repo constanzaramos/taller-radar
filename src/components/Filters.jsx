@@ -32,8 +32,8 @@ export default function Filters() {
   const hasActiveFilters = selectedCategory || selectedPrice || selectedModality;
 
   return (
-    <div className="bg-white border rounded-xl p-4 space-y-3 text-sm">
-      <h3 className="font-semibold mb-2 text-base">Filtros</h3>
+    <div className="bg-white border-2 border-black rounded-xl p-4 shadow-[4px_4px_0_#000] space-y-3 text-sm">
+      <h3 className="font-semibold mb-2 text-base text-black">Filtros</h3>
 
       {/* Categoría */}
       <div>
@@ -83,14 +83,55 @@ export default function Filters() {
         </select>
       </div>
 
-      {/* Botón limpiar filtros */}
+      {/* Tags de filtros activos */}
       {hasActiveFilters && (
-        <button
-          onClick={clearFilters}
-          className="w-full mt-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
-        >
-          Limpiar filtros
-        </button>
+        <div className="mt-3 space-y-2">
+          <div className="text-xs font-medium text-gray-600">Filtros activos:</div>
+          <div className="flex flex-wrap gap-2">
+            {selectedCategory && (
+              <div className="bg-[#A48FC9] border-2 border-black rounded-lg px-3 py-1.5 text-white text-xs font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+                <span>{selectedCategory}</span>
+                <button
+                  onClick={() => setSelectedCategory("")}
+                  className="hover:bg-[#8a75b8] rounded px-1"
+                  aria-label="Eliminar filtro"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {selectedPrice && (
+              <div className="bg-[#A48FC9] border-2 border-black rounded-lg px-3 py-1.5 text-white text-xs font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+                <span>{priceRanges.find(r => r.value === selectedPrice)?.label || selectedPrice}</span>
+                <button
+                  onClick={() => setSelectedPrice("")}
+                  className="hover:bg-[#8a75b8] rounded px-1"
+                  aria-label="Eliminar filtro"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {selectedModality && (
+              <div className="bg-[#A48FC9] border-2 border-black rounded-lg px-3 py-1.5 text-white text-xs font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+                <span>{selectedModality === "presencial" ? "Presencial" : "Online"}</span>
+                <button
+                  onClick={() => setSelectedModality("")}
+                  className="hover:bg-[#8a75b8] rounded px-1"
+                  aria-label="Eliminar filtro"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={clearFilters}
+            className="w-full mt-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
+          >
+            Limpiar todos
+          </button>
+        </div>
       )}
     </div>
   );

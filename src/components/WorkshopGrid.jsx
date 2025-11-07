@@ -130,7 +130,7 @@ export default function WorkshopGrid() {
           paginatedWorkshops.map((w) => (
             <div
               key={w.id}
-              className="border-2 border-black rounded-xl sm:rounded-2xl p-2 sm:p-3 bg-white shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
+              className="border-2 border-black rounded-xl sm:rounded-2xl p-2 sm:p-3 bg-[#FFFBF0] shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
               onClick={() => setSelectedWorkshop(w)}
             >
               {/* Imagen */}
@@ -143,17 +143,18 @@ export default function WorkshopGrid() {
                   />
                 </div>
               ) : (
-                <div className="w-full h-32 sm:h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-xs sm:text-sm border-2 border-black rounded-lg">
+                <div className="w-full h-32 sm:h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-xs sm:text-sm border-2 border-black rounded-lg">
                   Sin imagen
                 </div>
               )}
 
               {/* Información principal */}
-              <h3 className="font-semibold mt-2 text-sm sm:text-base line-clamp-2">{w.name}</h3>
-              <p className="text-xs sm:text-sm text-neutral-600 line-clamp-1">
+              <h3 className="font-semibold mt-2 text-sm sm:text-base line-clamp-2 text-black">{w.name}</h3>
+              <p className="text-xs sm:text-sm text-black line-clamp-1 mt-1">
                 {Array.isArray(w.category) ? w.category.join(", ") : w.category}
               </p>
-              <p className="text-xs sm:text-sm text-neutral-500">
+              <p className="text-xs sm:text-sm text-black mt-1 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-[#FE9B55] rounded-full"></span>
                 {formatDateForDisplay(w.date)}
               </p>
             </div>
@@ -205,7 +206,7 @@ export default function WorkshopGrid() {
                     onClick={() => goToPage(page)}
                     className={`min-w-[2.5rem] px-3 py-2 rounded-lg border-2 border-black font-semibold text-sm ${
                       currentPage === page
-                        ? "bg-sky-700 text-white shadow-[2px_2px_0_#000]"
+                        ? "bg-[#A48FC9] text-white shadow-[2px_2px_0_#000]"
                         : "bg-white hover:bg-gray-50 shadow-[2px_2px_0_#000] hover:translate-y-[1px]"
                     }`}
                   >
