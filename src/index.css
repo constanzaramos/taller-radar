@@ -1,1 +1,29 @@
 @import "tailwindcss";
+
+*, *::before, *::after {
+  border-radius: 0 !important;
+}
+
+@font-face {
+  font-family: "Agrandir GrandHeavy";
+  src: url("./assets/fonts/Agrandir-GrandHeavy.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "BDSans";
+  src: url("./assets/fonts/BDSans-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "BDSans", sans-serif;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Agrandir GrandHeavy", "BDSans", sans-serif;
+}

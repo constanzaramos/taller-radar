@@ -3,8 +3,10 @@ import { db } from "../firebase/config";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
 import { uploadToImgBB } from "../utils/uploadToImgBB";
+import { useNavigate } from "react-router-dom";
 
 export default function WorkshopForm() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -123,6 +125,10 @@ export default function WorkshopForm() {
       setSuccess(true);
       reset();
       setPreview("");
+      // Redirigir a la página principal después de 2 segundos
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
     } catch (err) {
       console.error("Error al guardar taller:", err);
       const errorMessage = err.message || "Error desconocido";
@@ -134,10 +140,10 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-[#FE9B55] border-2 border-black rounded-xl p-4 sm:p-6 max-w-4xl mx-auto shadow-[4px_4px_0_#000]">
-      <h3 className="font-semibold text-base sm:text-lg mb-4 text-white">Publicar un taller</h3>
+    <div className="bg-[#FE9B55] border-2 border-black rounded-xl p-6 sm:p-8 max-w-5xl mx-auto shadow-[4px_4px_0_#000]">
+      <h3 className="font-bold text-xl sm:text-2xl mb-6 text-white">Publicar un taller</h3>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4 sm:gap-5 text-sm">
         {/* Nombre */}
         <div>
           <input
@@ -145,7 +151,7 @@ export default function WorkshopForm() {
               required: "El nombre es obligatorio",
               minLength: { value: 2, message: "Debe tener al menos 2 caracteres" },
             })}
-            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
+            className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
             placeholder="Nombre del taller *"
           />
           {errors.name && <p className="text-red-600 text-xs">{errors.name.message}</p>}
@@ -155,7 +161,7 @@ export default function WorkshopForm() {
         <div>
           <select
             {...register("category", { required: "Selecciona una categoría" })}
-            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black"
+            className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black focus:border-[#41CBBC] focus:outline-none transition-colors"
           >
             <option value="">Seleccionar categoría *</option>
             {categories.map((c) => (
@@ -181,11 +187,11 @@ export default function WorkshopForm() {
           <>
             <input
               {...register("address")}
-              className="bg-white border border-gray-300 rounded-lg p-2 col-span-2 text-black placeholder-gray-500"
+              className="bg-white border-2 border-gray-300 rounded-lg p-3 col-span-2 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
               placeholder="Dirección exacta (Ej: Av. Italia 1234)"
             />
-            <input {...register("commune")} className="bg-white border border-gray-300 rounded-lg p-2 text-black placeholder-gray-500" placeholder="Comuna" />
-            <input {...register("city")} className="bg-white border border-gray-300 rounded-lg p-2 text-black placeholder-gray-500" placeholder="Ciudad" />
+            <input {...register("commune")} className="bg-white border-2 border-gray-300 rounded-lg p-3 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors" placeholder="Comuna" />
+            <input {...register("city")} className="bg-white border-2 border-gray-300 rounded-lg p-3 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors" placeholder="Ciudad" />
           </>
         )}
 
@@ -213,7 +219,7 @@ export default function WorkshopForm() {
               <input
                 type="date"
                 {...register("date", { required: dateType === "single" ? "Selecciona una fecha" : false })}
-                className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black"
+                className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black focus:border-[#41CBBC] focus:outline-none transition-colors"
                 placeholder="Fecha del taller"
               />
             </div>
@@ -230,7 +236,7 @@ export default function WorkshopForm() {
                     {...register(`multipleDates.${index}.date`, { 
                       required: dateType === "multiple" && index === 0 ? "Agrega al menos una fecha" : false 
                     })}
-                    className="bg-white border border-gray-300 rounded-lg p-2 flex-1 text-black placeholder-gray-500"
+                    className="bg-white border-2 border-gray-300 rounded-lg p-3 flex-1 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
                     placeholder="Fecha"
                   />
                   {dateFields.length > 1 && (
@@ -272,7 +278,7 @@ export default function WorkshopForm() {
                   <input 
                     type="date" 
                     {...register("recurringStart", { required: dateType === "recurring" ? "Fecha inicio requerida" : false })} 
-                    className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black" 
+                    className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black focus:border-[#41CBBC] focus:outline-none transition-colors" 
                   />
                 </div>
                 <div>
@@ -280,7 +286,7 @@ export default function WorkshopForm() {
                   <input 
                     type="date" 
                     {...register("recurringEnd", { required: dateType === "recurring" ? "Fecha fin requerida" : false })} 
-                    className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black" 
+                    className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black focus:border-[#41CBBC] focus:outline-none transition-colors" 
                   />
                 </div>
               </div>
@@ -289,7 +295,7 @@ export default function WorkshopForm() {
                 <input
                   type="number"
                   {...register("numberOfClasses", { min: 1 })}
-                  className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
+                  className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
                   placeholder="Ej: 8 clases"
                 />
               </div>
@@ -316,7 +322,7 @@ export default function WorkshopForm() {
               max: { value: 99, message: "Debe ser menor a 99" },
             })}
             placeholder="Edad mínima (opcional)"
-            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
+            className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
           />
           {errors.ageMin && <p className="text-red-600 text-xs">{errors.ageMin.message}</p>}
         </div>
@@ -327,7 +333,7 @@ export default function WorkshopForm() {
           <input
             type="number"
             {...register("price", { min: { value: 0, message: "Debe ser mayor o igual a 0" } })}
-            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
+            className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
             placeholder="Precio (CLP)"
           />
           <label className="flex items-center gap-2 text-white">
@@ -353,7 +359,7 @@ export default function WorkshopForm() {
                     message: "Debe comenzar con @ y solo letras/números",
                   },
                 })}
-                className="bg-white border border-gray-300 rounded-lg p-2 flex-1 text-black placeholder-gray-500"
+                className="bg-white border-2 border-gray-300 rounded-lg p-3 flex-1 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
                 placeholder="@usuario"
               />
               <button type="button" onClick={() => remove(index)} className="text-red-500 text-sm">
@@ -412,7 +418,7 @@ export default function WorkshopForm() {
               required: "La descripción es obligatoria",
               minLength: { value: 10, message: "Debe tener al menos 10 caracteres" },
             })}
-            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black placeholder-gray-500"
+            className="bg-white border-2 border-gray-300 rounded-lg p-3 w-full text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
             rows="3"
             placeholder="Descripción del taller *"
           />

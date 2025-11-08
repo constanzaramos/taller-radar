@@ -8,6 +8,7 @@ import WorkshopGrid from "./components/WorkshopGrid";
 import WorkshopForm from "./components/WorkshopForm";
 import AdminPanel from "./components/AdminPanel";
 import AdminLogin from "./components/AdminLogin";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
@@ -22,10 +23,10 @@ export default function App() {
               backgroundSize: '100% 4px'
             }}>
               <NavBar />
-              <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-8 lg:py-10 space-y-6 sm:space-y-8 lg:space-y-10">
+              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
                 <Hero />
-                <section className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-                  <div className="lg:col-span-1 space-y-3 sm:space-y-4">
+                <section className="mt-8 sm:mt-10 lg:mt-12 grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
+                  <div className="lg:col-span-1 space-y-6">
                     <Calendar />
                     <Filters />
                   </div>
@@ -33,12 +34,21 @@ export default function App() {
                     <WorkshopGrid />
                   </div>
                 </section>
-                <WorkshopForm />
               </main>
+              <Footer />
             </div>
           }
         />
-          <Route path="/login" element={<AdminLogin />} />
+        <Route path="/publicar" element={
+          <div className="min-h-screen bg-white text-neutral-900">
+            <NavBar />
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+              <WorkshopForm />
+            </main>
+            <Footer />
+          </div>
+        } />
+        <Route path="/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </Router>

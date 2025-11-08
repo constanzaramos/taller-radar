@@ -25,13 +25,13 @@ export default function WorkshopModal({
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto p-4 sm:p-6"
+        className="relative bg-white rounded-2xl border-2 border-black shadow-[8px_8px_0_#000] max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto p-6 sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Botón cerrar */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 sm:top-3 sm:right-4 text-neutral-500 hover:text-neutral-800 text-xl sm:text-2xl font-bold z-10"
+          className="absolute top-4 right-4 sm:top-5 sm:right-6 text-neutral-500 hover:text-black text-2xl sm:text-3xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
           aria-label="Cerrar modal"
         >
           ✕
@@ -47,7 +47,7 @@ export default function WorkshopModal({
         )}
 
         {/* Título y categoría */}
-        <h2 className="text-lg sm:text-xl font-bold mb-1 pr-8">{workshop.name}</h2>
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 pr-10 text-black leading-tight">{workshop.name}</h2>
         <p className="text-sm text-neutral-600 mb-2">
           {Array.isArray(workshop.category)
             ? workshop.category.join(", ")
@@ -130,14 +130,26 @@ export default function WorkshopModal({
           <p className="text-sm mb-2">
             <span className="font-semibold">🔗 Redes:</span>{" "}
             <a
-              href={workshop.social}
+              href={typeof workshop.social === 'string' ? workshop.social : (Array.isArray(workshop.social) && workshop.social.length > 0 ? workshop.social[0] : '#')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sky-700 hover:underline"
             >
               {(() => {
                 // Extraer el @ de la URL de Instagram
-                const url = workshop.social;
+                let url = '';
+                if (typeof workshop.social === 'string') {
+                  url = workshop.social;
+                } else if (Array.isArray(workshop.social) && workshop.social.length > 0) {
+                  url = typeof workshop.social[0] === 'string' ? workshop.social[0] : (workshop.social[0]?.handle || workshop.social[0] || '');
+                } else if (workshop.social && typeof workshop.social === 'object') {
+                  url = workshop.social.handle || workshop.social.url || '';
+                }
+                
+                if (!url || typeof url !== 'string') {
+                  return "Ver perfil";
+                }
+                
                 const match = url.match(/instagram\.com\/([^/?]+)/);
                 const username = match ? match[1] : null;
                 return username ? `@${username}` : "Ver perfil";

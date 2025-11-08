@@ -11,7 +11,7 @@ export default function WorkshopGrid() {
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { selectedDate, setSelectedDate } = useDate();
-  const { selectedCategory, selectedPrice, selectedModality } = useFilters();
+  const { selectedCategory, selectedPrice, selectedModality, setSelectedCategory, setSelectedPrice, setSelectedModality } = useFilters();
   const ITEMS_PER_PAGE = 9;
 
   // 🔥 Obtener talleres aprobados en tiempo real desde Firestore
@@ -103,29 +103,75 @@ export default function WorkshopGrid() {
     }
   };
 
+  const priceRanges = [
+    { value: "free", label: "Gratis" },
+    { value: "0-10000", label: "$0 - $10.000" },
+    { value: "10000-30000", label: "$10.000 - $30.000" },
+    { value: "30000-50000", label: "$30.000 - $50.000" },
+    { value: "50000+", label: "$50.000+" },
+  ];
+
+  const hasActiveFilters = selectedCategory || selectedPrice || selectedModality;
+
   return (
     <div>
       {/* Botón para volver a ver todos */}
       {selectedDate && (
-        <div className="mb-4">
+        <div className="mb-6">
           <button
             onClick={() => setSelectedDate(null)}
-            className="text-sky-700 text-sm font-medium hover:underline"
+            className="text-[#41CBBC] text-sm font-semibold hover:text-[#FE9B55] transition-colors flex items-center gap-2"
           >
-            🔁 Ver todos los talleres
+            <span>↩</span>
+            <span>Ver todos los talleres</span>
           </button>
         </div>
       )}
 
-      {/* Información de resultados */}
-      {filteredWorkshops.length > 0 && (
-        <div className="mb-4 text-sm text-neutral-600">
-          Mostrando {startIndex + 1}-{Math.min(endIndex, filteredWorkshops.length)} de {filteredWorkshops.length} talleres
+      {/* Pills de filtros activos */}
+      {hasActiveFilters && (
+        <div className="mb-6 flex flex-wrap gap-2 items-center">
+          {selectedCategory && (
+            <div className="bg-[#A48FC9] border-2 border-black rounded-full px-4 py-2 text-white text-sm font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+              <span>{selectedCategory}</span>
+              <button
+                onClick={() => setSelectedCategory("")}
+                className="hover:bg-[#8a75b8] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                aria-label="Eliminar filtro"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {selectedPrice && (
+            <div className="bg-[#A48FC9] border-2 border-black rounded-full px-4 py-2 text-white text-sm font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+              <span>{priceRanges.find(r => r.value === selectedPrice)?.label || selectedPrice}</span>
+              <button
+                onClick={() => setSelectedPrice("")}
+                className="hover:bg-[#8a75b8] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                aria-label="Eliminar filtro"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {selectedModality && (
+            <div className="bg-[#A48FC9] border-2 border-black rounded-full px-4 py-2 text-white text-sm font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+              <span>{selectedModality === "presencial" ? "Presencial" : "Online"}</span>
+              <button
+                onClick={() => setSelectedModality("")}
+                className="hover:bg-[#8a75b8] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                aria-label="Eliminar filtro"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       )}
 
       {/* Grid de talleres */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 relative">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 relative">
         {paginatedWorkshops.length > 0 ? (
           paginatedWorkshops.map((w) => (
             <div
@@ -160,9 +206,17 @@ export default function WorkshopGrid() {
             </div>
           ))
         ) : (
-          <p className="col-span-full text-center text-neutral-500 italic py-8 sm:py-10 text-sm sm:text-base">
-            🗓️ No hay talleres para este día
-          </p>
+          <div className="col-span-full text-center py-12 sm:py-16">
+            <p className="text-neutral-500 text-base sm:text-lg mb-2">🗓️</p>
+            <p className="text-neutral-600 text-sm sm:text-base font-medium">
+              No hay talleres disponibles
+            </p>
+            {selectedDate && (
+              <p className="text-neutral-500 text-xs sm:text-sm mt-1">
+                Prueba seleccionando otra fecha o limpiando los filtros
+              </p>
+            )}
+          </div>
         )}
 
         {/* Modal de detalle */}
@@ -176,7 +230,7 @@ export default function WorkshopGrid() {
 
       {/* Controles de paginación */}
       {totalPages > 1 && (
-        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
           {/* Botón anterior */}
           <button
             onClick={() => goToPage(currentPage - 1)}

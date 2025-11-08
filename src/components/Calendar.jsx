@@ -82,9 +82,9 @@ export default function Calendar() {
   };
 
   return (
-    <div className="bg-[#41CBBC] border-2 border-black rounded-2xl p-3 sm:p-4 shadow-[4px_4px_0_#000] text-xs sm:text-sm">
+    <div className="bg-[#41CBBC] border-2 border-black rounded-2xl p-4 sm:p-5 shadow-[4px_4px_0_#000]">
       {/* Header de navegación */}
-      <div className="flex justify-between items-center mb-2 sm:mb-3 border-b-2 border-black pb-2">
+      <div className="flex justify-between items-center mb-4 border-b-2 border-black pb-3">
         <button
           onClick={handlePrevMonth}
           className="p-1 sm:p-2 text-black font-bold hover:bg-white/30 rounded transition"
@@ -105,7 +105,7 @@ export default function Calendar() {
       </div>
 
       {/* Días de la semana */}
-      <div className="grid grid-cols-7 text-center font-medium text-black text-xs sm:text-sm mb-1">
+      <div className="grid grid-cols-7 text-center font-bold text-black text-xs sm:text-sm mb-2 gap-1">
         <div>L</div>
         <div>M</div>
         <div>M</div>
