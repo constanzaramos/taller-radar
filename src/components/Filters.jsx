@@ -10,6 +10,9 @@ export default function Filters() {
     setSelectedPrice,
     selectedModality,
     setSelectedModality,
+    selectedCity,
+    setSelectedCity,
+    availableCities,
     clearFilters,
   } = useFilters();
 
@@ -31,7 +34,7 @@ export default function Filters() {
     { value: "50000+", label: "$50.000+" },
   ];
 
-  const hasActiveFilters = selectedCategory || selectedPrice || selectedModality;
+  const hasActiveFilters = selectedCategory || selectedPrice || selectedModality || selectedCity;
 
   return (
     <div className="relative">
@@ -45,7 +48,7 @@ export default function Filters() {
           <span>Filtros</span>
           {hasActiveFilters && (
             <span className="bg-[#FE9B55] text-white text-xs px-2 py-0.5 rounded-full border-2 border-black">
-              {[selectedCategory, selectedPrice, selectedModality].filter(Boolean).length}
+              {[selectedCategory, selectedPrice, selectedModality, selectedCity].filter(Boolean).length}
             </span>
           )}
         </span>
@@ -103,6 +106,23 @@ export default function Filters() {
           <option value="">Todas las modalidades</option>
           <option value="presencial">Presencial</option>
           <option value="online">Online</option>
+        </select>
+      </div>
+
+      {/* Ciudad */}
+      <div>
+        <label className="block text-xs font-semibold text-gray-700 mb-2">Localidad</label>
+        <select
+          value={selectedCity}
+          onChange={(e) => setSelectedCity(e.target.value)}
+          className="w-full border-2 border-gray-300 rounded-lg p-2.5 text-sm focus:border-[#FE9B55] focus:outline-none transition-colors"
+        >
+          <option value="">Todas las localidades</option>
+          {availableCities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
         </select>
       </div>
 

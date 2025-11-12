@@ -1,7 +1,25 @@
-import { Link } from "react-router-dom";
+import { useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import bannerImage from "../assets/banner.png";
 
 export default function Hero() {
+  const navigate = useNavigate();
+
+  const handleScrollToWorkshops = useCallback(() => {
+    const target = document.getElementById("workshops-section");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/", { replace: true });
+      requestAnimationFrame(() => {
+        const retryTarget = document.getElementById("workshops-section");
+        if (retryTarget) {
+          retryTarget.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    }
+  }, [navigate]);
+
   return (
     <section
       className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden min-h-screen"
@@ -43,12 +61,13 @@ export default function Hero() {
 
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8">
-              <Link
-                to="/"
+              <button
+                type="button"
+                onClick={handleScrollToWorkshops}
                 className="inline-block bg-[#90EE90] hover:bg-[#7FDC7F] text-black font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg border-2 border-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 transition-all duration-200 text-base sm:text-lg text-center"
               >
                 Encontrar talleres
-              </Link>
+              </button>
               <Link
                 to="/publicar"
                 className="inline-block bg-[#90EE90] hover:bg-[#7FDC7F] text-black font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-lg border-2 border-black shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 transition-all duration-200 text-base sm:text-lg text-center"

@@ -6,11 +6,14 @@ export function FilterProvider({ children }) {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
   const [selectedModality, setSelectedModality] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [availableCities, setAvailableCities] = useState([]);
 
   const clearFilters = () => {
     setSelectedCategory("");
     setSelectedPrice("");
     setSelectedModality("");
+    setSelectedCity("");
   };
 
   return (
@@ -22,6 +25,10 @@ export function FilterProvider({ children }) {
         setSelectedPrice,
         selectedModality,
         setSelectedModality,
+        selectedCity,
+        setSelectedCity,
+        availableCities,
+        setAvailableCities,
         clearFilters,
       }}
     >

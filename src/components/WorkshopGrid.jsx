@@ -11,7 +11,17 @@ export default function WorkshopGrid() {
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const { selectedDate, setSelectedDate } = useDate();
-  const { selectedCategory, selectedPrice, selectedModality, setSelectedCategory, setSelectedPrice, setSelectedModality } = useFilters();
+  const {
+    selectedCategory,
+    setSelectedCategory,
+    selectedPrice,
+    setSelectedPrice,
+    selectedModality,
+    setSelectedModality,
+    selectedCity,
+    setSelectedCity,
+    setAvailableCities,
+  } = useFilters();
   const ITEMS_PER_PAGE = 9;
   const tz = "America/Santiago";
   const now = new Date();
@@ -34,9 +44,18 @@ export default function WorkshopGrid() {
       });
       
       setWorkshops(data);
+      const uniqueCities = Array.from(
+        new Set(
+          data
+            .map((w) => (w.city || w.commune || "").trim())
+            .filter(Boolean)
+            .map((city) => city.charAt(0).toUpperCase() + city.slice(1))
+        )
+      ).sort((a, b) => a.localeCompare(b, "es"));
+      setAvailableCities(uniqueCities);
     });
     return () => unsubscribe();
-  }, []);
+  }, [setAvailableCities]);
 
   // 🎯 Filtrar talleres por fecha y otros filtros
   const filteredWorkshops = workshops.filter((w) => {
@@ -90,6 +109,12 @@ export default function WorkshopGrid() {
       if (w.modality !== selectedModality) return false;
     }
 
+    // Filtro por ciudad
+    if (selectedCity) {
+      const workshopCity = (w.city || w.commune || "").trim().toLowerCase();
+      if (workshopCity !== selectedCity.trim().toLowerCase()) return false;
+    }
+
     return true;
   });
 
@@ -102,7 +127,7 @@ export default function WorkshopGrid() {
   // Resetear a página 1 cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedDate, selectedCategory, selectedPrice, selectedModality, filteredWorkshops.length]);
+  }, [selectedDate, selectedCategory, selectedPrice, selectedModality, selectedCity, filteredWorkshops.length]);
 
   // Navegación de páginas
   const goToPage = (page) => {
@@ -120,7 +145,7 @@ export default function WorkshopGrid() {
     { value: "50000+", label: "$50.000+" },
   ];
 
-  const hasActiveFilters = selectedCategory || selectedPrice || selectedModality;
+  const hasActiveFilters = selectedCategory || selectedPrice || selectedModality || selectedCity;
 
   return (
     <div>
@@ -169,6 +194,18 @@ export default function WorkshopGrid() {
               <span>{selectedModality === "presencial" ? "Presencial" : "Online"}</span>
               <button
                 onClick={() => setSelectedModality("")}
+                className="hover:bg-[#8a75b8] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                aria-label="Eliminar filtro"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {selectedCity && (
+            <div className="bg-[#A48FC9] border-2 border-black rounded-full px-4 py-2 text-white text-sm font-medium flex items-center gap-2 shadow-[2px_2px_0_#000]">
+              <span>{selectedCity}</span>
+              <button
+                onClick={() => setSelectedCity("")}
                 className="hover:bg-[#8a75b8] rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
                 aria-label="Eliminar filtro"
               >
