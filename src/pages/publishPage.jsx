@@ -8,43 +8,43 @@ export default function PublishPage() {
     <div className="min-h-screen bg-[#FFF7F0] flex flex-col">
       <NavBar />
       <main className="flex-1">
-        <section className="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-10 items-center">
-          {/* Lado izquierdo: copy + imagen */}
-          <div className="flex flex-col items-start space-y-5">
-            <h1 className="text-4xl md:text-5xl font-black text-black leading-tight">
-              Deja de publicar en todas partes.
-            </h1>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 xl:gap-16 items-start">
+            {/* Narrativa principal */}
+            <div className="relative flex flex-col gap-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-black leading-[1.05]">
+                Deja de publicar en todas partes.
+                </h1>
+                <p className="text-base sm:text-lg text-neutral-700 max-w-xl leading-relaxed">
+                  En Taller Radar reunimos talleres creativos y manuales en un solo lugar para que más personas
+                  descubran tu propuesta.
+                </p>
+              </div>
 
-            <p className="text-lg text-gray-800 font-medium max-w-md">
-              <strong className="text-[#7A3FFF]">Taller Radar</strong> reúne a las personas
-              que buscan talleres como el tuyo.
-            </p>
+              <div className="relative max-w-sm">
+                <div className="bg-[#41CBBC] border-2 border-black rounded-[28px] px-6 py-5 shadow-[4px_4px_0_#000]">
+                  <p className="text-sm sm:text-base font-medium text-black leading-relaxed">
+                    Publica <span className="font-black">GRATIS</span> tu taller y llega a quienes están buscando aprender algo nuevo.
+                  </p>
+                </div>
+                <div className="absolute -bottom-5 left-12 w-10 h-10 bg-[#41CBBC] border-b-2 border-r-2 border-black rotate-45"></div>
+              </div>
 
-            <p className="text-gray-700 max-w-md">
-              Publica tu taller gratis y llega a tu público ideal sin perder tiempo.
-            </p>
+              <div className="relative mt-4">
+                <div className="absolute -top-10 -left-10 w-40 h-30 rounded-full opacity-70 blur-[1px]"></div>
+                <img
+                  src={phon}
+                  alt="Persona respondiendo múltiples teléfonos"
+                  className="relative w-full max-w-[520px] lg:max-w-[520px] rounded-lg"
+                />
+              </div>
+            </div>
 
-            {/* Botón que hace scroll al formulario */}
-            <a
-              href="#form"
-              className="mt-4 inline-block bg-[#7A3FFF] text-white font-semibold px-6 py-3 rounded-md 
-              border-2 border-black shadow-[3px_3px_0_#000] hover:-translate-y-1 
-              hover:shadow-[5px_5px_0_#000] transition-all duration-150"
-            >
-              Completar formulario
-            </a>
-
-            {/* Imagen retro decorativa */}
-            <img
-              src={phon}
-              alt="Mujer vintage con teléfonos"
-              className="w-3/4 max-w-sm mt-6 rounded-lg shadow-[4px_4px_0_#000] border-2 border-black"
-            />
-          </div>
-
-          {/* Lado derecho: el formulario */}
-          <div id="form" className="w-full">
-            <WorkshopForm />
+            {/* Formulario */}
+            <div id="form" className="w-full flex justify-center lg:justify-end">
+              <WorkshopForm />
+            </div>
           </div>
         </section>
       </main>

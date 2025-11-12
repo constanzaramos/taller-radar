@@ -140,7 +140,7 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-[#FE9B55] border-2 border-black rounded-xl p-6 sm:p-8 max-w-5xl mx-auto shadow-[4px_4px_0_#000]">
+    <div className="bg-[#FE9B55] border-2 border-black rounded-[28px] p-6 sm:p-8 w-full max-w-[480px] mx-auto lg:mx-0 shadow-[6px_6px_0_#000]">
       <h3 className="font-bold text-xl sm:text-2xl mb-6 text-white">Publicar un taller</h3>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4 sm:gap-5 text-sm">

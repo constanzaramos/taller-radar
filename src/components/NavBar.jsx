@@ -18,13 +18,20 @@ export default function NavBar() {
         
         {/* Menú desktop */}
         <ul className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium">
-          <li><a href="#" className="text-black hover:text-[#FE9B55] transition-colors">Inicio</a></li>
+          <li>
+            <Link to="/" className="text-black hover:text-[#FE9B55] transition-colors">
+              Inicio
+            </Link>
+          </li>
           <li><a href="#" className="text-black hover:text-[#FE9B55] transition-colors">Sobre</a></li>
           <li><a href="#" className="text-black hover:text-[#FE9B55] transition-colors">Contacto</a></li>
           <li>
-            <button className="bg-[#A48FC9] hover:bg-[#8a75b8] text-white rounded-lg px-4 py-2 text-sm font-semibold border-2 border-black shadow-[2px_2px_0_#000] transition-all">
-              Sign Up
-            </button>
+            <Link
+              to="/publicar"
+              className="bg-[#A48FC9] hover:bg-[#8a75b8] text-white rounded-lg px-4 py-2 text-sm font-semibold border-2 border-black shadow-[2px_2px_0_#000] transition-all"
+            >
+              Publicar taller
+            </Link>
           </li>
         </ul>
 
@@ -52,9 +59,13 @@ export default function NavBar() {
             <li><a href="#" className="hover:text-sky-600 block py-2">About</a></li>
             <li><a href="#" className="hover:text-sky-600 block py-2">Contact</a></li>
             <li>
-              <button className="bg-sky-700 hover:bg-sky-800 text-white rounded-lg px-3 py-2 w-full text-sm">
-                Sign Up
-              </button>
+              <Link
+                to="/publicar"
+                onClick={() => setIsMenuOpen(false)}
+                className="bg-sky-700 hover:bg-sky-800 text-white rounded-lg px-3 py-2 w-full text-sm text-center"
+              >
+                Publicar taller
+              </Link>
             </li>
           </ul>
         </div>

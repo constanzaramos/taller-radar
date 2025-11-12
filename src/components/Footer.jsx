@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="bg-black text-white mt-12">
@@ -52,13 +54,22 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-700 mt-10 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="border-t border-gray-700 mt-10 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-2">
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} Taller Radar. Todos los derechos reservados.
           </p>
-          <p className="text-xs text-gray-500">
-            Diseñado con cariño para la comunidad creativa.
-          </p>
+          <div className="flex items-center gap-3 text-xs">
+            <Link
+              to="/login"
+              className="text-gray-300 hover:text-white transition-colors font-semibold"
+            >
+              Portal
+            </Link>
+            <span className="hidden sm:inline text-gray-600">|</span>
+            <p className="text-gray-500">
+              Diseñado con cariño para la comunidad creativa.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

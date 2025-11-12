@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  signOut,
+} from "firebase/auth";
 import { auth } from "../firebase/config";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +15,7 @@ export default function AdminLogin() {
   const navigate = useNavigate();
 
   const provider = new GoogleAuthProvider();
+  const allowedGoogleEmail = "tallerradarcl@gmail.com";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,7 +31,14 @@ export default function AdminLogin() {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, provider);
+      setError("");
+      const result = await signInWithPopup(auth, provider);
+      const email = result?.user?.email?.toLowerCase();
+      if (email !== allowedGoogleEmail) {
+        await signOut(auth);
+        setError("Este correo no tiene acceso con Google.");
+        return;
+      }
       navigate("/admin");
     } catch (err) {
       console.error(err);

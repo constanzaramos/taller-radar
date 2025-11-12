@@ -8,16 +8,19 @@ export default function WorkshopModal({
   onApprove,
   onReject,
 }) {
-  if (!workshop) return null;
+  const isOpen = Boolean(workshop);
 
   // 🔹 Cerrar al presionar la tecla Escape
   useEffect(() => {
+    if (!isOpen) return;
     const handleEsc = (e) => {
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -56,7 +59,7 @@ export default function WorkshopModal({
 
         {/* Fecha */}
         {workshop.multipleDates && workshop.multipleDates.length > 0 ? (
-          <div className="text-sm mb-2">
+          <div className="text-sm mb-2 font-manrope">
             <span className="font-semibold">📅 Fechas:</span>
             <ul className="list-disc list-inside ml-2 mt-1">
               {workshop.multipleDates.map((date, idx) => (
@@ -65,7 +68,7 @@ export default function WorkshopModal({
             </ul>
           </div>
         ) : (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">📅 Fecha:</span>{" "}
             {formatDateForDisplay(workshop.date)}
           </p>
@@ -73,7 +76,7 @@ export default function WorkshopModal({
 
         {/* Información de taller recurrente */}
         {workshop.isRecurring && workshop.recurringDays && workshop.recurringDays.length > 0 && (
-          <div className="text-sm mb-2">
+          <div className="text-sm mb-2 font-manrope">
             <span className="font-semibold">🔄 Taller recurrente:</span>
             <div className="ml-2 mt-1">
               <p>Días: {Array.isArray(workshop.recurringDays) ? workshop.recurringDays.join(", ") : workshop.recurringDays}</p>
@@ -91,14 +94,14 @@ export default function WorkshopModal({
 
         {/* Hora */}
         {workshop.time && (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">🕒 Hora:</span> {workshop.time}
           </p>
         )}
 
         {/* Modalidad */}
         {workshop.modality && (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">📍 Modalidad:</span>{" "}
             {workshop.modality === "presencial" ? "Presencial" : "Online"}
           </p>
@@ -106,20 +109,20 @@ export default function WorkshopModal({
 
         {/* Precio */}
         {workshop.confirmPriceOnRegistration ? (
-          <p className="text-sm mb-2 font-semibold text-orange-600">
+          <p className="text-sm mb-2 font-manrope font-semibold text-orange-600">
             💰 Precio a confirmar al momento de la inscripción
           </p>
         ) : workshop.price === 0 ? (
-          <p className="text-sm mb-2 font-semibold text-green-700">💸 Gratis</p>
+          <p className="text-sm mb-2 font-manrope font-semibold text-green-700">💸 Gratis</p>
         ) : (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">💰 Precio:</span> ${workshop.price?.toLocaleString("es-CL") || workshop.price}
           </p>
         )}
 
         {/* Contacto */}
         {workshop.contact && (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">📞 Contacto:</span>{" "}
             {workshop.contact}
           </p>
@@ -127,7 +130,7 @@ export default function WorkshopModal({
 
         {/* Redes */}
         {workshop.social && (
-          <p className="text-sm mb-2">
+          <p className="text-sm mb-2 font-manrope">
             <span className="font-semibold">🔗 Redes:</span>{" "}
             <a
               href={typeof workshop.social === 'string' ? workshop.social : (Array.isArray(workshop.social) && workshop.social.length > 0 ? workshop.social[0] : '#')}
@@ -161,11 +164,11 @@ export default function WorkshopModal({
         {workshop.modality === "presencial" && (
           <>
             {workshop.confirmAddressOnRegistration ? (
-              <p className="text-sm mb-2 font-semibold text-orange-600">
+              <p className="text-sm mb-2 font-manrope text-orange-600">
                 📍 Dirección a confirmar al momento de la inscripción
               </p>
             ) : workshop.fullAddress ? (
-              <p className="text-sm mb-2">
+              <p className="text-sm mb-2 font-manrope">
                 <span className="font-semibold">📍 Dirección:</span> {workshop.fullAddress}
               </p>
             ) : null}
@@ -174,7 +177,9 @@ export default function WorkshopModal({
 
         {/* Descripción */}
         {workshop.description && (
-          <p className="text-sm mb-4">{workshop.description}</p>
+          <p className="text-sm mb-4 font-manrope text-justify leading-relaxed">
+            {workshop.description}
+          </p>
         )}
 
         {/* Mapa embebido */}
