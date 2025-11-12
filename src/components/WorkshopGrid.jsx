@@ -46,8 +46,8 @@ export default function WorkshopGrid() {
       setWorkshops(data);
       const uniqueCities = Array.from(
         new Set(
-          data
-            .map((w) => (w.city || w.commune || "").trim())
+        data
+          .map((w) => (w.city || w.commune || "").trim())
             .filter(Boolean)
             .map((city) => city.charAt(0).toUpperCase() + city.slice(1))
         )
@@ -59,15 +59,23 @@ export default function WorkshopGrid() {
 
   // 🎯 Filtrar talleres por fecha y otros filtros
   const filteredWorkshops = workshops.filter((w) => {
-    // Normalizar fecha del taller
-    const workshopDate = getLocalDateString(w.date);
-    if (!workshopDate) return false;
+    const primaryDate = getLocalDateString(w.date);
+    const recurringDates = Array.isArray(w.multipleDates)
+      ? w.multipleDates
+          .map((d) => getLocalDateString(d))
+          .filter(Boolean)
+      : [];
+
+    // todas las fechas asociadas al taller
+    const allDates = [primaryDate, ...recurringDates].filter(Boolean);
+    if (allDates.length === 0) return false;
 
     // Filtro por fecha
     if (selectedDate) {
-      if (workshopDate !== selectedDate) return false;
-    } else if (todayString && workshopDate < todayString) {
-      return false;
+      if (!allDates.includes(selectedDate)) return false;
+    } else if (todayString) {
+      const hasFutureDate = allDates.some((date) => date >= todayString);
+      if (!hasFutureDate) return false;
     }
 
     // Filtro por categoría
@@ -220,11 +228,26 @@ export default function WorkshopGrid() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 relative">
         {paginatedWorkshops.length > 0 ? (
           paginatedWorkshops.map((w) => {
-            const workshopDateString = getLocalDateString(w.date);
+            const baseDate = getLocalDateString(w.date);
+            const extraDates = Array.isArray(w.multipleDates)
+              ? w.multipleDates.map((date) => getLocalDateString(date)).filter(Boolean)
+              : [];
+            const allDates = [baseDate, ...extraDates].filter(Boolean);
+
+            let displayDate = "";
+            if (selectedDate && allDates.includes(selectedDate)) {
+              displayDate = selectedDate;
+            } else if (todayString) {
+              const sortedDates = [...allDates].sort();
+              const upcoming = sortedDates.find((date) => date >= todayString);
+              displayDate = upcoming || (sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : "");
+            } else {
+              const sortedDates = [...allDates].sort();
+              displayDate = sortedDates.length > 0 ? sortedDates[0] : "";
+            }
+
             const isPastWorkshop =
-              workshopDateString && todayString
-                ? workshopDateString < todayString
-                : false;
+              displayDate && todayString ? displayDate < todayString : false;
             const cardBaseClasses =
               "border-2 rounded-xl sm:rounded-2xl p-2 sm:p-3 transition-all duration-200";
             const cardStateClasses = isPastWorkshop
@@ -276,7 +299,7 @@ export default function WorkshopGrid() {
                       isPastWorkshop ? "bg-neutral-400" : "bg-[#FE9B55]"
                     }`}
                   ></span>
-                  {formatDateForDisplay(w.date)}
+                  {formatDateForDisplay(displayDate || w.date)}
                 </p>
               </div>
             );

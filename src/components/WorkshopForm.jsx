@@ -140,10 +140,10 @@ export default function WorkshopForm() {
   };
 
   return (
-    <div className="bg-[#FE9B55] border-2 border-black rounded-[28px] p-6 sm:p-8 w-full max-w-[480px] mx-auto lg:mx-0 shadow-[6px_6px_0_#000]">
+    <div className="bg-[#FE9B55] border-2 border-black rounded-[28px] p-6 sm:p-8 w-full max-w-[480px] mx-auto lg:mx-0 shadow-[6px_6px_0_#000] self-stretch flex flex-col">
       <h3 className="font-bold text-xl sm:text-2xl mb-6 text-white">Publicar un taller</h3>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4 sm:gap-5 text-sm">
+      <form onSubmit={handleSubmit(onSubmit)} className="grid sm:grid-cols-2 gap-4 sm:gap-5 text-sm flex-1">
         {/* Nombre */}
         <div>
           <input
@@ -379,8 +379,8 @@ export default function WorkshopForm() {
             type="button"
             onClick={() => document.getElementById("imageInput").click()}
             className={`flex items-center gap-2 ${
-              preview ? "bg-green-600 hover:bg-green-700" : "bg-sky-700 hover:bg-sky-800"
-            } text-white px-4 py-2 rounded-lg transition`}
+              preview ? "bg-green-600 hover:bg-green-700" : "bg-[#90EE90] hover:bg-[#7FDC7F]"
+            } text-black font-semibold px-4 py-2 rounded-lg border-2 border-black transition`}
           >
             {preview ? "Cambiar imagen" : "Subir imagen"}
           </button>
