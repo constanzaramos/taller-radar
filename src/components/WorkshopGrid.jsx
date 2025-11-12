@@ -67,7 +67,7 @@ export default function WorkshopGrid() {
       : [];
 
     // todas las fechas asociadas al taller
-    const allDates = [primaryDate, ...recurringDates].filter(Boolean);
+    const allDates = [primaryDate, ...recurringDates].filter(Boolean).sort();
     if (allDates.length === 0) return false;
 
     // Filtro por fecha
@@ -130,7 +130,36 @@ export default function WorkshopGrid() {
   const totalPages = Math.ceil(filteredWorkshops.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedWorkshops = filteredWorkshops.slice(startIndex, endIndex);
+  const sortedWorkshops = [...filteredWorkshops].sort((a, b) => {
+    const datesA = [
+      getLocalDateString(a.date),
+      ...(Array.isArray(a.multipleDates)
+        ? a.multipleDates.map((d) => getLocalDateString(d))
+        : []),
+    ]
+      .filter(Boolean)
+      .sort();
+    const datesB = [
+      getLocalDateString(b.date),
+      ...(Array.isArray(b.multipleDates)
+        ? b.multipleDates.map((d) => getLocalDateString(d))
+        : []),
+    ]
+      .filter(Boolean)
+      .sort();
+
+    const nextDateA =
+      datesA.find((date) => date >= todayString) || datesA[datesA.length - 1] || "";
+    const nextDateB =
+      datesB.find((date) => date >= todayString) || datesB[datesB.length - 1] || "";
+
+    if (!nextDateA && !nextDateB) return 0;
+    if (!nextDateA) return 1;
+    if (!nextDateB) return -1;
+    return nextDateA.localeCompare(nextDateB);
+  });
+
+  const paginatedWorkshops = sortedWorkshops.slice(startIndex, endIndex);
 
   // Resetear a página 1 cuando cambian los filtros
   useEffect(() => {
@@ -240,7 +269,8 @@ export default function WorkshopGrid() {
             } else if (todayString) {
               const sortedDates = [...allDates].sort();
               const upcoming = sortedDates.find((date) => date >= todayString);
-              displayDate = upcoming || (sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : "");
+              displayDate =
+                upcoming || (sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : "");
             } else {
               const sortedDates = [...allDates].sort();
               displayDate = sortedDates.length > 0 ? sortedDates[0] : "";

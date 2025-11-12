@@ -11,6 +11,7 @@ import AdminLogin from "./components/AdminLogin";
 import Footer from "./components/Footer";
 import CallToActionBanner from "./components/CallToActionBanner";
 import PublishPage from "./pages/publishPage";
+import LinksPage from "./pages/linksPage";
 
 export default function App() {
   return (
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/publicar" element={
           <PublishPage />
         } />
+        <Route path="/links" element={<LinksPage />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPanel />} />
       </Routes>

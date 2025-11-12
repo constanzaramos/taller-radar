@@ -15,10 +15,10 @@ export default function WorkshopForm() {
     control,
     formState: { errors },
   } = useForm({
-    defaultValues: { 
+    defaultValues: {
       social: [{ handle: "" }],
-      multipleDates: [{ date: "" }],
-      dateType: "single"
+      multipleDates: [{ date: "", time: "" }],
+      dateType: "single",
     },
   });
 
@@ -90,6 +90,25 @@ export default function WorkshopForm() {
         mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(fullAddress)}&output=embed`;
       }
 
+      const multipleDateEntries =
+        dateType === "multiple"
+          ? (data.multipleDates || [])
+              .map(({ date, time }) => ({
+                date: date || "",
+                time: time || "",
+              }))
+              .filter((entry) => entry.date)
+          : [];
+
+      const primaryDate =
+        dateType === "single"
+          ? data.date
+          : dateType === "multiple"
+          ? multipleDateEntries[0]?.date || data.date
+          : data.date;
+
+      const primaryTime = dateType === "multiple" ? "" : data.time;
+
       // Datos a guardar
       const formattedData = {
         name: data.name.trim(),
@@ -100,9 +119,10 @@ export default function WorkshopForm() {
         city: data.city || "",
         fullAddress,
         // Manejar diferentes tipos de fechas
-        date: dateType === "single" ? data.date : (dateType === "multiple" ? data.multipleDates?.[0]?.date || data.date : data.date),
-        multipleDates: dateType === "multiple" ? (data.multipleDates || []).map(d => d.date).filter(Boolean) : null,
-        time: data.time,
+        date: primaryDate,
+        multipleDates: dateType === "multiple" ? multipleDateEntries.map((entry) => entry.date) : null,
+        multipleDateTimes: dateType === "multiple" ? multipleDateEntries : null,
+        time: primaryTime,
         price: data.isFree ? 0 : Number(data.price || 0),
         ageMin: data.ageMin ? Number(data.ageMin) : null,
         isRecurring: dateType === "recurring" || data.isRecurring || false,
@@ -227,18 +247,29 @@ export default function WorkshopForm() {
 
           {/* Múltiples fechas específicas */}
           {dateType === "multiple" && (
-            <div className="space-y-2 border border-gray-300 rounded-lg p-3 bg-white/20">
+            <div className="space-y-3 border border-gray-300 rounded-lg p-3 bg-white/20">
               <div className="text-sm font-medium mb-2 text-white">Agregar fechas específicas:</div>
               {dateFields.map((field, index) => (
-                <div key={field.id} className="flex items-center gap-2">
+                <div key={field.id} className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <input
                     type="date"
-                    {...register(`multipleDates.${index}.date`, { 
-                      required: dateType === "multiple" && index === 0 ? "Agrega al menos una fecha" : false 
+                    {...register(`multipleDates.${index}.date`, {
+                      required: dateType === "multiple" && index === 0 ? "Agrega al menos una fecha" : false,
                     })}
                     className="bg-white border-2 border-gray-300 rounded-lg p-3 flex-1 text-black placeholder-gray-500 focus:border-[#41CBBC] focus:outline-none transition-colors"
                     placeholder="Fecha"
                   />
+                  <select
+                    {...register(`multipleDates.${index}.time`)}
+                    className="bg-white border-2 border-gray-300 rounded-lg p-2.5 text-black min-w-[160px] focus:border-[#41CBBC] focus:outline-none transition-colors"
+                  >
+                    <option value="">Sin hora definida</option>
+                    {times.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
                   {dateFields.length > 1 && (
                     <button
                       type="button"
@@ -252,7 +283,7 @@ export default function WorkshopForm() {
               ))}
               <button
                 type="button"
-                onClick={() => appendDate({ date: "" })}
+                onClick={() => appendDate({ date: "", time: "" })}
                 className="text-white text-sm hover:underline"
               >
                 + Agregar otra fecha
@@ -305,8 +336,14 @@ export default function WorkshopForm() {
 
         {/* Hora */}
         <div>
-          <select {...register("time", { required: "Selecciona una hora" })} className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black">
-            <option value="">Seleccionar hora *</option>
+          <select
+            {...register("time", {
+              required: dateType === "multiple" ? false : "Selecciona una hora",
+            })}
+            className="bg-white border border-gray-300 rounded-lg p-2 w-full text-black"
+            disabled={dateType === "multiple"}
+          >
+            <option value="">{dateType === "multiple" ? "Seleccionar hora (no disponible)" : "Seleccionar hora *"}</option>
             {times.map((t) => (
               <option key={t}>{t}</option>
             ))}

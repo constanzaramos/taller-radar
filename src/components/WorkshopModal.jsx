@@ -61,10 +61,25 @@ export default function WorkshopModal({
         {workshop.multipleDates && workshop.multipleDates.length > 0 ? (
           <div className="text-sm mb-2 font-manrope">
             <span className="font-semibold">📅 Fechas:</span>
-            <ul className="list-disc list-inside ml-2 mt-1">
-              {workshop.multipleDates.map((date, idx) => (
-                <li key={idx}>{formatDateForDisplay(date)}</li>
-              ))}
+            <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
+              {workshop.multipleDates.map((date, idx) => {
+                const matchingSchedule =
+                  Array.isArray(workshop.multipleDateTimes) &&
+                  workshop.multipleDateTimes.find(
+                    (entry) =>
+                      entry &&
+                      typeof entry === "object" &&
+                      entry.date === date
+                  );
+                return (
+                  <li key={idx}>
+                    {formatDateForDisplay(date)}
+                    {matchingSchedule?.time ? (
+                      <span className="ml-2 text-neutral-600">· {matchingSchedule.time} hrs</span>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ) : (
