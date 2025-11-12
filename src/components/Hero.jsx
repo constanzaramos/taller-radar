@@ -3,14 +3,13 @@ import bannerImage from "../assets/banner.png";
 
 export default function Hero() {
   return (
-    <section 
-      className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden"
+    <section
+      className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden min-h-screen"
       style={{
         backgroundImage: `url(${bannerImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
-        minHeight: '00px',
       }}
     >
       {/* Contenido */}

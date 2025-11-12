@@ -13,6 +13,10 @@ export default function WorkshopGrid() {
   const { selectedDate, setSelectedDate } = useDate();
   const { selectedCategory, selectedPrice, selectedModality, setSelectedCategory, setSelectedPrice, setSelectedModality } = useFilters();
   const ITEMS_PER_PAGE = 9;
+  const tz = "America/Santiago";
+  const now = new Date();
+  const today = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+  const todayString = getLocalDateString(today);
 
   // 🔥 Obtener talleres aprobados en tiempo real desde Firestore
   useEffect(() => {
@@ -36,10 +40,15 @@ export default function WorkshopGrid() {
 
   // 🎯 Filtrar talleres por fecha y otros filtros
   const filteredWorkshops = workshops.filter((w) => {
+    // Normalizar fecha del taller
+    const workshopDate = getLocalDateString(w.date);
+    if (!workshopDate) return false;
+
     // Filtro por fecha
     if (selectedDate) {
-      const workshopDate = getLocalDateString(w.date);
       if (workshopDate !== selectedDate) return false;
+    } else if (todayString && workshopDate < todayString) {
+      return false;
     }
 
     // Filtro por categoría
@@ -173,38 +182,68 @@ export default function WorkshopGrid() {
       {/* Grid de talleres */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 relative">
         {paginatedWorkshops.length > 0 ? (
-          paginatedWorkshops.map((w) => (
-            <div
-              key={w.id}
-              className="border-2 border-black rounded-xl sm:rounded-2xl p-2 sm:p-3 bg-[#FFFBF0] shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
-              onClick={() => setSelectedWorkshop(w)}
-            >
-              {/* Imagen */}
-              {w.image ? (
-                <div className="w-full min-h-[150px] sm:min-h-[200px] max-h-[250px] sm:max-h-[300px] flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
-                  <img
-                    src={w.image}
-                    alt={w.name}
-                    className="max-w-full max-h-full w-auto h-auto object-contain"
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-32 sm:h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-xs sm:text-sm border-2 border-black rounded-lg">
-                  Sin imagen
-                </div>
-              )}
+          paginatedWorkshops.map((w) => {
+            const workshopDateString = getLocalDateString(w.date);
+            const isPastWorkshop =
+              workshopDateString && todayString
+                ? workshopDateString < todayString
+                : false;
+            const cardBaseClasses =
+              "border-2 rounded-xl sm:rounded-2xl p-2 sm:p-3 transition-all duration-200";
+            const cardStateClasses = isPastWorkshop
+              ? "border-neutral-400 bg-gray-200 opacity-70 cursor-not-allowed"
+              : "border-black bg-[#FFFBF0] shadow-[4px_4px_0_#000] hover:shadow-[6px_6px_0_#000] hover:-translate-y-0.5 cursor-pointer";
+            const textColorClass = isPastWorkshop ? "text-neutral-600" : "text-black";
+            return (
+              <div
+                key={w.id}
+                aria-disabled={isPastWorkshop}
+                className={`${cardBaseClasses} ${cardStateClasses}`}
+                onClick={() => {
+                  if (!isPastWorkshop) {
+                    setSelectedWorkshop(w);
+                  }
+                }}
+                role="button"
+                tabIndex={isPastWorkshop ? -1 : 0}
+                onKeyDown={(event) => {
+                  if (!isPastWorkshop && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    setSelectedWorkshop(w);
+                  }
+                }}
+              >
+                {/* Imagen */}
+                {w.image ? (
+                  <div className="w-full min-h-[150px] sm:min-h-[200px] max-h-[250px] sm:max-h-[300px] flex items-center justify-center bg-gray-50 rounded-lg overflow-hidden">
+                    <img
+                      src={w.image}
+                      alt={w.name}
+                      className="max-w-full max-h-full w-auto h-auto object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-32 sm:h-40 bg-gray-200 flex items-center justify-center text-gray-500 text-xs sm:text-sm border-2 border-black rounded-lg">
+                    Sin imagen
+                  </div>
+                )}
 
-              {/* Información principal */}
-              <h3 className="font-semibold mt-2 text-sm sm:text-base line-clamp-2 text-black">{w.name}</h3>
-              <p className="text-xs sm:text-sm text-black line-clamp-1 mt-1">
-                {Array.isArray(w.category) ? w.category.join(", ") : w.category}
-              </p>
-              <p className="text-xs sm:text-sm text-black mt-1 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-[#FE9B55] rounded-full"></span>
-                {formatDateForDisplay(w.date)}
-              </p>
-            </div>
-          ))
+                {/* Información principal */}
+                <h3 className={`font-semibold mt-2 text-sm sm:text-base line-clamp-2 ${textColorClass}`}>{w.name}</h3>
+                <p className={`text-xs sm:text-sm ${textColorClass} line-clamp-1 mt-1`}>
+                  {Array.isArray(w.category) ? w.category.join(", ") : w.category}
+                </p>
+                <p className={`text-xs sm:text-sm ${textColorClass} mt-1 flex items-center gap-1`}>
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      isPastWorkshop ? "bg-neutral-400" : "bg-[#FE9B55]"
+                    }`}
+                  ></span>
+                  {formatDateForDisplay(w.date)}
+                </p>
+              </div>
+            );
+          })
         ) : (
           <div className="col-span-full text-center py-12 sm:py-16">
             <p className="text-neutral-500 text-base sm:text-lg mb-2">🗓️</p>

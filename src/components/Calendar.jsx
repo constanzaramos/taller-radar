@@ -49,18 +49,12 @@ export default function Calendar() {
   const handleSelectDay = (day) => {
     if (!day) return;
     const localDay = new Date(day.toLocaleString("en-US", { timeZone: tz }));
-    const startOfToday = new Date(today);
-    startOfToday.setHours(0, 0, 0, 0);
-
-    if (localDay < startOfToday) return; // ❌ no permitir días pasados
     setSelectedDate(localDay.toISOString().split("T")[0]);
   };
 
   // 🗓 Nombre del mes
-  const monthName = new Date(currentYear, currentMonth).toLocaleString("es-CL", {
-    month: "long",
-    year: "numeric",
-  });
+  const displayDate = new Date(currentYear, currentMonth);
+  const monthName = `${displayDate.toLocaleString("es-CL", { month: "long" })} ${displayDate.getFullYear()}`;
 
   // ✅ Comprobaciones de fecha
   const isToday = (date) => {
@@ -127,13 +121,12 @@ export default function Calendar() {
           return (
             <button
               key={i}
-              disabled={past}
               onClick={() => handleSelectDay(day)}
               className={`min-w-[1.75rem] sm:min-w-[2.5rem] w-7 h-7 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg transition-all border-2 text-xs sm:text-sm ${
-                past
-                  ? "text-neutral-400 cursor-not-allowed border-transparent"
-                  : isSelected
+                isSelected
                   ? "bg-[#FE9B55] text-black font-bold border-black shadow-[2px_2px_0_#000]"
+                  : past
+                  ? "border-transparent hover:bg-white/50 text-neutral-400"
                   : todayCheck
                   ? "border-black text-black font-medium hover:bg-white/50"
                   : "border-transparent hover:bg-white/50 text-black"

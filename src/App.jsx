@@ -9,6 +9,8 @@ import WorkshopForm from "./components/WorkshopForm";
 import AdminPanel from "./components/AdminPanel";
 import AdminLogin from "./components/AdminLogin";
 import Footer from "./components/Footer";
+import CallToActionBanner from "./components/CallToActionBanner";
+import PublishPage from "./pages/publishPage";
 
 export default function App() {
   return (
@@ -23,7 +25,7 @@ export default function App() {
               backgroundSize: '100% 4px'
             }}>
               <NavBar />
-              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+              <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-8 sm:pb-10 lg:pb-12">
                 <Hero />
                 <section className="mt-8 sm:mt-10 lg:mt-12 grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
                   <div className="lg:col-span-1 space-y-6">
@@ -34,19 +36,14 @@ export default function App() {
                     <WorkshopGrid />
                   </div>
                 </section>
+                <CallToActionBanner />
               </main>
               <Footer />
             </div>
           }
         />
         <Route path="/publicar" element={
-          <div className="min-h-screen bg-white text-neutral-900">
-            <NavBar />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-              <WorkshopForm />
-            </main>
-            <Footer />
-          </div>
+          <PublishPage />
         } />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPanel />} />
