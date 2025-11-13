@@ -22,7 +22,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden min-h-screen"
+      className="relative max-w-7xl mx-auto rounded-2xl overflow-hidden min-h-[60vh] sm:min-h-[70vh] md:min-h-[80vh] lg:min-h-screen"
       style={{
         backgroundImage: `url(${bannerImage})`,
         backgroundSize: 'cover',
